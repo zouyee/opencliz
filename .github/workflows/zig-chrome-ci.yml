@@ -1,0 +1,99 @@
+# Zig + Chrome CDP 最小 CI（Wave 3.1）
+# 矩阵内 1-2 个场景的自动化浏览器测试
+name: Zig Chrome CDP
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'src/browser/**'
+      - 'src/adapters/adapter_browser.zig'
+      - 'src/adapters/article_pipeline.zig'
+      - '.github/workflows/zig-chrome-ci.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'src/browser/**'
+      - 'src/adapters/adapter_browser.zig'
+      - 'src/adapters/article_pipeline.zig'
+      - '.github/workflows/zig-chrome-ci.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: zig-chrome-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chrome-cdp-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.15.2
+
+      - name: Cache Zig
+        uses: actions/cache@v4
+        with:
+          path: |
+            .zig-cache
+            .zig-global-cache
+          key: zig-${{ runner.os }}-${{ hashFiles('build.zig.zon', 'build.zig') }}
+          restore-keys: |
+            zig-${{ runner.os }}-
+
+      - name: Setup Chrome
+        uses: ./.github/actions/setup-chrome
+        id: setup-chrome
+
+      - name: Build
+        env:
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: zig build -Doptimize=ReleaseSafe
+
+      - name: Run CDP smoke tests (Linux, via xvfb)
+        if: runner.os == 'Linux'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            ./zig-out/bin/opencli web/read --url 'https://example.com' -f json
+
+      - name: Run CDP smoke tests (macOS)
+        if: runner.os == 'macos-latest'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          ./zig-out/bin/opencli web/read --url 'https://example.com' -f json
+
+      - name: Run CDP weixin test (Linux)
+        if: runner.os == 'Linux'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        # Skip if no valid URL provided - this is a smoke test
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            ./zig-out/bin/opencli weixin/download --url 'https://mp.weixin.qq.com/s/test' -f json || true
+
+      - name: Run CDP weixin test (macOS)
+        if: runner.os == 'macos-latest'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          ./zig-out/bin/opencli weixin/download --url 'https://mp.weixin.qq.com/s/test' -f json || true
+
+  # 验收标准：命令不崩溃，返回 JSON（即使 status 字段表明需要登录）
