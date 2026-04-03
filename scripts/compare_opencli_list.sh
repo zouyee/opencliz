@@ -9,7 +9,7 @@
 #
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BIN="${ROOT}/zig-out/bin/opencli"
+BIN="${ROOT}/zig-out/bin/opencliz"
 if [[ ! -x "$BIN" ]]; then
   echo "请先: cd \"$ROOT\" && zig build" >&2
   exit 1

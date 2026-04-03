@@ -1,6 +1,6 @@
 # All Adapters
 
-Run `opencli list` for the live registry.
+Run `opencliz list` for the live registry.
 
 > **Zig port (`opencliz`)**: Per-site **Prerequisites** often still mention the **Browser Bridge** extension (upstream wording). **This build does not use it.** See **`BROWSER_PREREQUISITES.md`** for the Zig workflow, plus **`../CURRENT_CAPABILITIES_AND_UPSTREAM_DIFF.md`** and **`../advanced/cdp.md`**.
 

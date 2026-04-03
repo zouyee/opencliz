@@ -11,9 +11,11 @@ if (-not (Test-Path $chatwiseExe)) {
   throw "ChatWise executable not found at $chatwiseExe"
 }
 
-$opencli = Get-Command opencli -ErrorAction SilentlyContinue
+# Prefer opencliz (this repo); fall back to `opencli` if installed for compatibility.
+$opencli = Get-Command opencliz -ErrorAction SilentlyContinue
+if (-not $opencli) { $opencli = Get-Command opencli -ErrorAction SilentlyContinue }
 if (-not $opencli) {
-  throw 'opencli was not found in PATH'
+  throw 'opencliz (or opencli) was not found in PATH'
 }
 
 function Clear-LocalProxyEnv {

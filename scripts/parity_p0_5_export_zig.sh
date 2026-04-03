@@ -5,7 +5,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${0}")/.." && pwd)"
 OUT="${PARITY_OUT:-$ROOT/parity-output}/zig"
-ZIG_BIN="${ZIG_BIN:-$ROOT/zig-out/bin/opencli}"
+ZIG_BIN="${ZIG_BIN:-$ROOT/zig-out/bin/opencliz}"
 export OPENCLI_CACHE="${OPENCLI_CACHE:-0}"
 
 mkdir -p "$OUT"

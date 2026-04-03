@@ -1,4 +1,4 @@
-# 掘金 (Juejin)
+# Juejin
 
 **Mode**: 🌐 Public · **Domain**: `juejin.cn`
 
@@ -6,10 +6,10 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli juejin hot` | Hot articles feed |
+| `opencliz juejin hot` | Hot articles feed |
 
 ## Examples
 
 ```bash
-opencli juejin hot --limit 10 -f json
+opencliz juejin hot --limit 10 -f json
 ```

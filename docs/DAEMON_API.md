@@ -1,11 +1,11 @@
-# OpenCLI Daemon API
+# opencliz Daemon API
 
-OpenCLI can run as a background daemon service, providing a REST API for remote command execution.
+**opencliz** can run as a background daemon (`opencliz serve`), exposing a REST API for remote command execution.
 
 ## Starting the Daemon
 
 ```bash
-opencli serve
+opencliz serve
 ```
 
 The daemon will start on `http://127.0.0.1:8080` by default.
@@ -17,12 +17,12 @@ The daemon will start on `http://127.0.0.1:8080` by default.
 | `OPENCLI_DAEMON_PORT` | Listen port (default `8080`) |
 | `OPENCLI_DAEMON_HOST` | Bind address (default `127.0.0.1`) |
 | `OPENCLI_DAEMON_AUTH_TOKEN` | If set, **all** routes (except `OPTIONS` preflight) require one of the credentials below |
-| `OPENCLI_DAEMON_REQUEST_TIMEOUT_MS` | 单连接读取完整 HTTP 请求（头+体）的总超时，毫秒；默认 `30000`；`0` 表示不限制（与旧行为一致；慎用） |
-| `OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS` | **`/execute` 内**命令执行 wall-clock 超时（毫秒）；默认 `0` = 不限制。超时返回 **504** + `{"error":"Execute timeout"}`；宿主仍会 **join** 工作线程（**不取消**正在运行的子进程/网络请求） |
+| `OPENCLI_DAEMON_REQUEST_TIMEOUT_MS` | Total time to read one full HTTP request (headers + body) on a connection, in ms; default `30000`; `0` = unlimited (legacy behavior; use with care). |
+| `OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS` | Wall-clock timeout **inside** **`/execute`** (ms); default `0` = unlimited. On timeout: **504** + `{"error":"Execute timeout"}`; the host still **joins** the worker thread (**does not** cancel in-flight child processes or network I/O). |
 
-curl 后端（`HttpClient.request`）另支持 **`OPENCLI_HTTP_FOLLOW_REDIRECTS`**（`0` 关闭 `-L`）、**`OPENCLI_HTTP_MAX_REDIRECTS`**（默认 `10`）、**`OPENCLI_HTTP_MAX_OUTPUT_BYTES`**（`Child.run` 上限，默认 20 MiB）。
+The curl-backed `HttpClient.request` path also honors **`OPENCLI_HTTP_FOLLOW_REDIRECTS`** (`0` disables `-L`), **`OPENCLI_HTTP_MAX_REDIRECTS`** (default `10`), and **`OPENCLI_HTTP_MAX_OUTPUT_BYTES`** (cap for `Child.run`, default 20 MiB).
 
-**适配器 HTTP（`serve` / CLI 共用进程）**：**`OPENCLI_CACHE=0`** 关闭 **`http_exec`** 内 **`fetchJson`** 的进程内 JSON 响应缓存（与 TS 并排 diff 时建议关闭）；TTL/条数上限见 **`OPENCLI_CACHE_HTTP_TTL_MS`** 等（**`CacheManager.initFromEnv`**）。
+**Adapter HTTP (`serve` / CLI same process)**: **`OPENCLI_CACHE=0`** disables in-process JSON caching for **`fetchJson`** inside **`http_exec`** (recommended when diffing against TS); TTL / entry limits use **`OPENCLI_CACHE_HTTP_TTL_MS`** and related vars (**`CacheManager.initFromEnv`**).
 
 ## API Endpoints
 
@@ -32,8 +32,8 @@ Returns daemon status and version.
 **Response:**
 ```json
 {
-  "name": "OpenCLI Daemon",
-  "version": "2.2.0",
+  "name": "opencliz daemon",
+  "version": "v0.0.1",
   "status": "running"
 }
 ```
@@ -108,7 +108,7 @@ curl -X POST "http://localhost:8080/execute/github/trending" \
 }
 ```
 
-若设置 **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS` > 0** 且执行超过该时长：**504** + `{"error":"Execute timeout"}`。
+If **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS` > 0** and execution exceeds that limit: **504** + `{"error":"Execute timeout"}`.
 
 ## Configuration
 
@@ -117,9 +117,9 @@ Runtime options are driven by **environment variables** (see above). Conceptual 
 - `host` / `port`: from `OPENCLI_DAEMON_HOST` / `OPENCLI_DAEMON_PORT`
 - `auth_token`: from `OPENCLI_DAEMON_AUTH_TOKEN`
 - `enable_cors`: enabled in code (default **true**); responses include `Access-Control-*` headers
-- `request_timeout_ms`: from `OPENCLI_DAEMON_REQUEST_TIMEOUT_MS`（读请求阶段）
-- `execute_timeout_ms`: from `OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS`（`/execute` 内执行；`0` 关闭）
-- `max_connections`: 仍为预留字段（当前 accept 循环未做连接数硬限制）
+- `request_timeout_ms`: from `OPENCLI_DAEMON_REQUEST_TIMEOUT_MS` (request read phase)
+- `execute_timeout_ms`: from `OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS` (inside `/execute`; `0` disables)
+- `max_connections`: reserved; accept loop does not enforce a hard connection cap yet
 
 ## Authentication
 
@@ -137,12 +137,12 @@ Missing or wrong credentials → **401** with body `{"error":"Unauthorized"}`.
 
 ### Start daemon on custom port
 ```bash
-OPENCLI_DAEMON_PORT=9000 opencli serve
+OPENCLI_DAEMON_PORT=9000 opencliz serve
 ```
 
 ### Daemon with auth token
 ```bash
-OPENCLI_DAEMON_AUTH_TOKEN='my-secret' opencli serve
+OPENCLI_DAEMON_AUTH_TOKEN='my-secret' opencliz serve
 curl -H "Authorization: Bearer my-secret" http://127.0.0.1:8080/health
 ```
 
@@ -193,50 +193,50 @@ curl -s "${DAEMON_URL}/execute/github/trending?language=$1" | jq '.data[0].full_
 
 | File | What it covers |
 |------|----------------|
-| **`src/tests/daemon_contract_test.zig`** | Handler-only: JSON shapes, `auth_token`（**Bearer** / **`X-OpenCLI-Token`** / **query `token`**）、错误 Bearer→**401**、`OPTIONS` 在要求鉴权时仍 **204**、未知命令 **`/execute/...`**→**404**（无 runner 亦先判命令）、`parseHttpRequest`、`POST` body merge、`dispatchHttpRequest` wire output |
-| **`src/tests/daemon_tcp_e2e_test.zig`** | Real TCP: **`GET /`**、`GET /health`、鉴权开启时无凭证 **401**、**`X-OpenCLI-Token`** 通过、带 Bearer 的 **`POST /execute/...`**（ts_legacy 桩） |
+| **`src/tests/daemon_contract_test.zig`** | Handler-only: JSON shapes, `auth_token` (**Bearer** / **`X-OpenCLI-Token`** / query **`token`**), bad Bearer → **401**, **`OPTIONS`** still **204** when auth is required, unknown **`/execute/...`** → **404** (command checked before runner), `parseHttpRequest`, `POST` body merge, `dispatchHttpRequest` wiring |
+| **`src/tests/daemon_tcp_e2e_test.zig`** | Real TCP: **`GET /`**, **`GET /health`**, **401** without creds when auth on, **`X-OpenCLI-Token`** accepted, **`POST /execute/...`** with Bearer (ts_legacy stub) |
 | **`src/tests/ai_explore_golden_test.zig`** | `exploreFromHtml` on **`explore_sample.html`** + **`explore_edge_min.html`** + `Synthesizer` vs **`tests/fixtures/golden/synthesizer_golden.yaml`** |
 
 Run: `zig build test`.
 
-## 与 TS 版 Daemon API 对照（Wave 4.3 diff）
+## Daemon API vs TypeScript upstream (Wave 4.3 diff)
 
-> ⚠️ 以下对照基于 Zig 版实现；TS 版完整 API 端点需对照 `src/daemon.ts`（若存在）。
+> ⚠️ This comparison reflects the Zig build. For the full TS surface, compare `src/daemon.ts` in the upstream repo (if present).
 
-### Zig 版已实现端点
+### Endpoints implemented in Zig
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/` | GET | 返回 `{"name","version","status"}` |
-| `/health` | GET | 返回 `{"status":"healthy"}` |
-| `/commands` | GET | 返回 `{"commands":[...]}` 命令列表 |
-| `/execute/{site}/{command}` | GET/POST/PUT/PATCH | 执行命令，参数通过 query string 或 JSON body 传入 |
+| Path | Method | Description |
+|------|--------|-------------|
+| `/` | GET | `{"name","version","status"}` |
+| `/health` | GET | `{"status":"healthy"}` |
+| `/commands` | GET | `{"commands":[...]}` command list |
+| `/execute/{site}/{command}` | GET/POST/PUT/PATCH | Run command; args from query string or JSON body |
 
-### Zig vs TS 差异（已知）
+### Known Zig vs TS differences
 
-| 维度 | TS 版 | Zig 版 |
-|------|-------|--------|
-| 请求超时 | 可能有 | **`readHttpRequestFromStream`** 按 **`request_timeout_ms`** / **`OPENCLI_DAEMON_REQUEST_TIMEOUT_MS`** 在读请求阶段生效；超时 **408**。执行阶段可选 **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS`**（**504**；不取消子进程，见上文） |
-| WebSocket | TS 可能支持 | **不支持**（纯 HTTP） |
-| 批量执行 | TS 可能支持 | **不支持** |
-| 端点前缀 | TS 可能是 `/api/` | Zig 直接用根路径 `/` |
-| 认证方式 | Bearer / X-Token / query | 与 TS 一致 |
+| Area | TS | Zig |
+|------|----|-----|
+| Request timeout | May exist | **`readHttpRequestFromStream`** uses **`request_timeout_ms`** / **`OPENCLI_DAEMON_REQUEST_TIMEOUT_MS`** during read → **408**. Optional **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS`** for execute → **504** (does not kill children; see above) |
+| WebSocket | TS may support | **Not supported** (HTTP only) |
+| Batch execute | TS may support | **Not supported** |
+| Path prefix | TS may use `/api/` | Zig uses `/` at repo root |
+| Auth | Bearer / X-Token / query | Same shape as TS |
 
-### 待对照项（若 TS 版本有）
+### Items to verify against TS (if applicable)
 
-| 潜在差异 | 状态 | 说明 |
-|----------|------|------|
-| `/api/commands` vs `/commands` | ⚠️ 需确认 | Zig 用 `/commands` |
-| `/api/execute/...` | ⚠️ 需确认 | Zig 用 `/execute/...` |
-| 认证 middleware | ✅ 已一致 | Bearer / **`X-OpenCLI-Token`** / query；**批次 62** 单测覆盖错误凭证与 **OPTIONS** 绕过 |
-| 请求/响应拦截器 | N/A | Zig 无此概念 |
-| keep-alive | ⚠️ 需确认 | 需测 TS 版 |
-| 未知命令错误码 | ✅ 与 REST 常见语义一致 | **`/execute`** 未注册命令 → **404** + **`{"error":"Command not found"}`**（**批次 65**；与 **`DAEMON_API`** 示例一致） |
+| Potential gap | Status | Note |
+|---------------|--------|------|
+| `/api/commands` vs `/commands` | ⚠️ confirm | Zig uses `/commands` |
+| `/api/execute/...` | ⚠️ confirm | Zig uses `/execute/...` |
+| Auth middleware | ✅ aligned | Bearer / **`X-OpenCLI-Token`** / query; batch **62** tests bad creds + **OPTIONS** |
+| Request/response interceptors | N/A | Not a Zig concept |
+| keep-alive | ⚠️ confirm | Measure on TS if needed |
+| Unknown command status | ✅ REST-like | Unregistered **`/execute`** → **404** + **`{"error":"Command not found"}`** (batch **65**; matches examples here) |
 
-### L7 阶段 H.4 签字
+### L7 phase H.4 sign-off
 
-| 层级 | 覆盖范围 | 对照基线 | 签字 | 日期 | 备注 |
-|------|----------|----------|------|------|------|
-| L7 | Daemon HTTP + explore/synthesize golden | 本文 + `daemon_*_test`（**批次 62** 扩鉴权/根路径/TCP）/ `ai_explore_golden_test`；TS 以各仓库 `daemon` 实现为准 | ZZ | 2026-04-01 | 前缀/WebSocket/批量等差异见上表「Zig vs TS」 |
+| Layer | Scope | Baseline | Sign | Date | Notes |
+|-------|-------|----------|------|------|-------|
+| L7 | Daemon HTTP + explore/synthesize golden | This doc + `daemon_*_test` (batch **62**: auth, `/`, TCP) / `ai_explore_golden_test`; TS = that repo’s daemon | ZZ | 2026-04-01 | Prefix / WebSocket / batch gaps → “Zig vs TS” table |
 
-**注意**：字节级一致**不**是目标；以「同命令同参数同响应结构」为验收口径。CLI **`explore` / `synthesize`** 与 Daemon 解耦；L7 扩测时一并记录 TS 行为差异。
+**Note**: Byte-identical responses are **not** the goal. Acceptance is same command, same args, same response **shape**. CLI **`explore` / `synthesize`** are decoupled from the daemon; record TS behavioral deltas when extending L7 tests.

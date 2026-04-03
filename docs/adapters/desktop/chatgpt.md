@@ -11,11 +11,11 @@ The current built-in commands use native AppleScript automation — no extra lau
 2. Grant **Accessibility permissions** to your terminal app in **System Settings → Privacy & Security → Accessibility**.
 
 ### Commands
-- `opencli chatgpt status`: Check if the ChatGPT app is currently running.
-- `opencli chatgpt new`: Activate ChatGPT and press `Cmd+N` to start a new conversation.
-- `opencli chatgpt send "message"`: Copy your message to clipboard, activate ChatGPT, paste, and submit.
-- `opencli chatgpt read`: Read the last visible message from the focused ChatGPT window via the Accessibility tree.
-- `opencli chatgpt ask "message"`: Send a prompt and wait for the visible reply in one shot.
+- `opencliz chatgpt status`: Check if the ChatGPT app is currently running.
+- `opencliz chatgpt new`: Activate ChatGPT and press `Cmd+N` to start a new conversation.
+- `opencliz chatgpt send "message"`: Copy your message to clipboard, activate ChatGPT, paste, and submit.
+- `opencliz chatgpt read`: Read the last visible message from the focused ChatGPT window via the Accessibility tree.
+- `opencliz chatgpt ask "message"`: Send a prompt and wait for the visible reply in one shot.
 
 ## Approach 2: CDP (Advanced, Electron Debug Mode)
 

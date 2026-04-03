@@ -1,12 +1,12 @@
 name: "🐛 Bug Report"
-description: Report a bug or unexpected behavior in OpenCLI
+description: Report a bug in **opencliz** (Zig port; not npm @jackwener/opencli)
 title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug. A short reproduction and any error output are usually enough.
+        This repo is **opencliz** (binary: `opencliz`). For the TypeScript **OpenCLI** project, see [jackwener/opencli](https://github.com/jackwener/opencli).
 
   - type: textarea
     id: description
@@ -23,7 +23,7 @@ body:
       label: Steps to Reproduce
       description: How can we reproduce this behavior?
       value: |
-        1. Run `opencli ...`
+        1. Run `opencliz ...`
         2. ...
         3. See error
     validations:
@@ -40,20 +40,18 @@ body:
   - type: input
     id: version
     attributes:
-      label: OpenCLI Version
-      description: "Run `opencli --version` to find out."
-      placeholder: "0.8.0"
+      label: opencliz version
+      description: "Run `opencliz --version` to find out."
+      placeholder: "v0.0.1"
     validations:
       required: true
 
-  - type: dropdown
-    id: node-version
+  - type: input
+    id: zig-version
     attributes:
-      label: Node.js Version
-      options:
-        - "20.x"
-        - "22.x"
-        - Other
+      label: Zig version
+      description: "Run `zig version`."
+      placeholder: "0.15.2"
     validations:
       required: true
 
@@ -74,9 +72,9 @@ body:
     attributes:
       label: Logs / Screenshots
       description: |
-        Paste any relevant error output. Run with `-v` for verbose logs:
+        Paste any relevant error output. Run with `--verbose` for verbose logs:
         ```
-        opencli <command> -v
+        opencliz <command> --verbose
         ```
       render: shell
     validations:

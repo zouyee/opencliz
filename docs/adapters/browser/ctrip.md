@@ -1,4 +1,4 @@
-# Ctrip (携程)
+# Ctrip
 
 **Mode**: 🔐 Browser · **Domain**: `ctrip.com`
 
@@ -6,19 +6,19 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli ctrip search` | |
+| `opencliz ctrip search` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli ctrip search --limit 5
+opencliz ctrip search --limit 5
 
 # JSON output
-opencli ctrip search -f json
+opencliz ctrip search -f json
 
 # Verbose mode
-opencli ctrip search -v
+opencliz ctrip search -v
 ```
 
 ## Prerequisites

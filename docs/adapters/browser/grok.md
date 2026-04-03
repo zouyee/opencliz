@@ -6,23 +6,23 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli grok ask` | Keep the default Grok ask behavior |
-| `opencli grok ask --web` | Use the explicit grok.com consumer web UI flow |
+| `opencliz grok ask` | Keep the default Grok ask behavior |
+| `opencliz grok ask --web` | Use the explicit grok.com consumer web UI flow |
 
 ## Usage Examples
 
 ```bash
 # Default / compatibility path
-opencli grok ask --prompt "Explain quantum computing in simple terms"
+opencliz grok ask --prompt "Explain quantum computing in simple terms"
 
 # Explicit consumer web path
-opencli grok ask --prompt "Explain quantum computing in simple terms" --web
+opencliz grok ask --prompt "Explain quantum computing in simple terms" --web
 
 # Best-effort fresh chat on the consumer web path
-opencli grok ask --prompt "Hello" --web --new
+opencliz grok ask --prompt "Hello" --web --new
 
 # Set custom timeout (default: 120s)
-opencli grok ask --prompt "Write a long essay" --web --timeout 180
+opencliz grok ask --prompt "Write a long essay" --web --timeout 180
 ```
 
 ### Options
@@ -36,8 +36,8 @@ opencli grok ask --prompt "Write a long essay" --web --timeout 180
 
 ## Behavior
 
-- `opencli grok ask` keeps the upstream/default behavior intact.
-- `opencli grok ask --web` switches to the newer hardened consumer-web implementation.
+- `opencliz grok ask` keeps the upstream/default behavior intact.
+- `opencliz grok ask --web` switches to the newer hardened consumer-web implementation.
 - The `--web` path adds stricter composer detection, clearer blocked/session-gated hints, and waits for a stabilized assistant bubble before returning.
 
 ## Prerequisites

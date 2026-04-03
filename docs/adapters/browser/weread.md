@@ -1,4 +1,4 @@
-# 微信读书 (WeRead)
+# WeRead
 
 **Mode**: 🔐 Browser · **Domain**: `weread.qq.com`
 
@@ -6,40 +6,40 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli weread shelf` | List books on your bookshelf |
-| `opencli weread search` | Search books on WeRead |
-| `opencli weread book` | View book details |
-| `opencli weread ranking` | Book rankings by category |
-| `opencli weread notebooks` | List books that have highlights or notes |
-| `opencli weread highlights` | List your highlights (underlines) in a book |
-| `opencli weread notes` | List your notes (thoughts) on a book |
+| `opencliz weread shelf` | List books on your bookshelf |
+| `opencliz weread search` | Search books on WeRead |
+| `opencliz weread book` | View book details |
+| `opencliz weread ranking` | Book rankings by category |
+| `opencliz weread notebooks` | List books that have highlights or notes |
+| `opencliz weread highlights` | List your highlights (underlines) in a book |
+| `opencliz weread notes` | List your notes (thoughts) on a book |
 
 ## Usage Examples
 
 ```bash
 # View your bookshelf
-opencli weread shelf --limit 20
+opencliz weread shelf --limit 20
 
 # Search books
-opencli weread search "三体"
+opencliz weread search "Three-Body"
 
 # View book details
-opencli weread book <book-id>
+opencliz weread book <book-id>
 
 # Book rankings
-opencli weread ranking --limit 10
+opencliz weread ranking --limit 10
 
 # List books with notes/highlights
-opencli weread notebooks
+opencliz weread notebooks
 
 # View highlights for a book
-opencli weread highlights <book-id>
+opencliz weread highlights <book-id>
 
 # View your notes
-opencli weread notes <book-id>
+opencliz weread notes <book-id>
 
 # JSON output
-opencli weread shelf -f json
+opencliz weread shelf -f json
 ```
 
 ## Prerequisites

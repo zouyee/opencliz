@@ -6,48 +6,48 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli twitter trending` | |
-| `opencli twitter bookmarks` | |
-| `opencli twitter profile` | |
-| `opencli twitter search` | |
-| `opencli twitter timeline` | |
-| `opencli twitter thread` | |
-| `opencli twitter following` | |
-| `opencli twitter followers` | |
-| `opencli twitter notifications` | |
-| `opencli twitter post` | |
-| `opencli twitter reply` | |
-| `opencli twitter delete` | |
-| `opencli twitter like` | |
-| `opencli twitter article` | |
-| `opencli twitter follow` | |
-| `opencli twitter unfollow` | |
-| `opencli twitter bookmark` | |
-| `opencli twitter unbookmark` | |
-| `opencli twitter block` | |
-| `opencli twitter unblock` | |
-| `opencli twitter hide-reply` | |
-| `opencli twitter download` | |
-| `opencli twitter accept` | |
-| `opencli twitter reply-dm` | |
+| `opencliz twitter trending` | |
+| `opencliz twitter bookmarks` | |
+| `opencliz twitter profile` | |
+| `opencliz twitter search` | |
+| `opencliz twitter timeline` | |
+| `opencliz twitter thread` | |
+| `opencliz twitter following` | |
+| `opencliz twitter followers` | |
+| `opencliz twitter notifications` | |
+| `opencliz twitter post` | |
+| `opencliz twitter reply` | |
+| `opencliz twitter delete` | |
+| `opencliz twitter like` | |
+| `opencliz twitter article` | |
+| `opencliz twitter follow` | |
+| `opencliz twitter unfollow` | |
+| `opencliz twitter bookmark` | |
+| `opencliz twitter unbookmark` | |
+| `opencliz twitter block` | |
+| `opencliz twitter unblock` | |
+| `opencliz twitter hide-reply` | |
+| `opencliz twitter download` | |
+| `opencliz twitter accept` | |
+| `opencliz twitter reply-dm` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli twitter trending --limit 5
+opencliz twitter trending --limit 5
 
 # Search top tweets (default)
-opencli twitter search "react 19"
+opencliz twitter search "react 19"
 
 # Search latest/live tweets
-opencli twitter search "react 19" --filter live
+opencliz twitter search "react 19" --filter live
 
 # JSON output
-opencli twitter trending -f json
+opencliz twitter trending -f json
 
 # Verbose mode
-opencli twitter trending -v
+opencliz twitter trending -v
 ```
 
 ## Prerequisites

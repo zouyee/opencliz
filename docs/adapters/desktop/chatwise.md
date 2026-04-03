@@ -20,19 +20,19 @@ export OPENCLI_CDP_ENDPOINT="http://127.0.0.1:9228"
 ## Commands
 
 ### Diagnostics
-- `opencli chatwise status`: Check CDP connection status.
-- `opencli chatwise screenshot`: Export DOM + accessibility snapshot.
+- `opencliz chatwise status`: Check CDP connection status.
+- `opencliz chatwise screenshot`: Export DOM + accessibility snapshot.
 
 ### Chat
-- `opencli chatwise new`: Start a new conversation (`Cmd+N`).
-- `opencli chatwise send "message"`: Send a message to the active chat.
-- `opencli chatwise read`: Read the current conversation.
-- `opencli chatwise ask "prompt"`: Send + wait for response + return it (one-shot).
+- `opencliz chatwise new`: Start a new conversation (`Cmd+N`).
+- `opencliz chatwise send "message"`: Send a message to the active chat.
+- `opencliz chatwise read`: Read the current conversation.
+- `opencliz chatwise ask "prompt"`: Send + wait for response + return it (one-shot).
 
 ### AI Features
-- `opencli chatwise model`: Get the current AI model.
-- `opencli chatwise model gpt-4`: Switch to a different model.
+- `opencliz chatwise model`: Get the current AI model.
+- `opencliz chatwise model gpt-4`: Switch to a different model.
 
 ### Organization
-- `opencli chatwise history`: List conversations from the sidebar.
-- `opencli chatwise export`: Export conversation as Markdown.
+- `opencliz chatwise history`: List conversations from the sidebar.
+- `opencliz chatwise export`: Export conversation as Markdown.

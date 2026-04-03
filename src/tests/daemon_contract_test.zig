@@ -41,8 +41,8 @@ test "daemon GET / matches DAEMON_API root shape" {
     var parsed = try std.json.parseFromSlice(std.json.Value, allocator, res.body, .{});
     defer parsed.deinit();
     try std.testing.expect(parsed.value == .object);
-    try expectJsonString(parsed.value.object, "name", "OpenCLI Daemon");
-    try expectJsonString(parsed.value.object, "version", "2.2.0");
+    try expectJsonString(parsed.value.object, "name", "opencliz daemon");
+    try expectJsonString(parsed.value.object, "version", "v0.0.1");
     try expectJsonString(parsed.value.object, "status", "running");
 }
 

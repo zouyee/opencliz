@@ -1,11 +1,11 @@
 # weather
 
-**Mode**: 🌐 Public · **Domain**: （天气数据源占位）
+**Mode**: 🌐 Public · **Domain**: _(weather data source placeholder)_
 
 ## Commands
 
-由内置适配器注册；子命令以 `opencli list` 为准。
+Registered by the built-in adapter; subcommands are listed in `opencliz list`.
 
 ```bash
-opencli list weather
+opencliz list weather
 ```

@@ -6,20 +6,20 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli arxiv search` | Search arXiv papers |
-| `opencli arxiv paper` | Get arXiv paper details by ID |
+| `opencliz arxiv search` | Search arXiv papers |
+| `opencliz arxiv paper` | Get arXiv paper details by ID |
 
 ## Usage Examples
 
 ```bash
 # Search for papers
-opencli arxiv search "transformer attention" --limit 10
+opencliz arxiv search "transformer attention" --limit 10
 
 # Get paper details by arXiv ID
-opencli arxiv paper 2301.00001
+opencliz arxiv paper 2301.00001
 
 # JSON output
-opencli arxiv search "LLM" -f json
+opencliz arxiv search "LLM" -f json
 ```
 
 ## Prerequisites

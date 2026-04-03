@@ -6,28 +6,28 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli stackoverflow hot` | Hot questions |
-| `opencli stackoverflow search` | Search questions |
-| `opencli stackoverflow bounties` | Questions with active bounties |
-| `opencli stackoverflow unanswered` | Unanswered questions |
+| `opencliz stackoverflow hot` | Hot questions |
+| `opencliz stackoverflow search` | Search questions |
+| `opencliz stackoverflow bounties` | Questions with active bounties |
+| `opencliz stackoverflow unanswered` | Unanswered questions |
 
 ## Usage Examples
 
 ```bash
 # Hot questions
-opencli stackoverflow hot --limit 10
+opencliz stackoverflow hot --limit 10
 
 # Search questions
-opencli stackoverflow search "async await" --limit 20
+opencliz stackoverflow search "async await" --limit 20
 
 # Active bounties
-opencli stackoverflow bounties --limit 10
+opencliz stackoverflow bounties --limit 10
 
 # Unanswered questions
-opencli stackoverflow unanswered --limit 10
+opencliz stackoverflow unanswered --limit 10
 
 # JSON output
-opencli stackoverflow hot -f json
+opencliz stackoverflow hot -f json
 ```
 
 ## Prerequisites

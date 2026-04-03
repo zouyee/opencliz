@@ -6,12 +6,12 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli pypi search` | Search packages (JSON API) |
-| `opencli pypi info` | Package metadata JSON |
+| `opencliz pypi search` | Search packages (JSON API) |
+| `opencliz pypi info` | Package metadata JSON |
 
 ## Examples
 
 ```bash
-opencli pypi search --query requests -f json
-opencli pypi info --package requests -f json
+opencliz pypi search --query requests -f json
+opencliz pypi info --package requests -f json
 ```

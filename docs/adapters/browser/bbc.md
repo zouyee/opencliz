@@ -6,19 +6,19 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli bbc news` | |
+| `opencliz bbc news` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli bbc news --limit 5
+opencliz bbc news --limit 5
 
 # JSON output
-opencli bbc news -f json
+opencliz bbc news -f json
 
 # Verbose mode
-opencli bbc news -v
+opencliz bbc news -v
 ```
 
 ## Prerequisites

@@ -1,6 +1,8 @@
 # Upstream baseline: jackwener/opencli
 
-Unless stated otherwise, **“upstream”**, **“TS OpenCLI”**, or **“original OpenCLI”** in this repository refers to:
+**This repository** is **opencliz** (Zig; binary **`opencliz`**). It is **not** the npm `@jackwener/opencli` package. Config paths **`~/.opencli`** and env **`OPENCLI_*`** are kept for adapter compatibility.
+
+Unless stated otherwise, **“upstream”**, **“TS OpenCLI”**, or **“original OpenCLI”** here refers to:
 
 | Item | Link / note |
 |------|-------------|

@@ -8,14 +8,15 @@ For the formal upstream baseline definition, see **`UPSTREAM_REFERENCE.md`**. Fo
 
 ## 1. Product identity
 
-| Item | This repository (Zig) | Upstream (TypeScript) |
+| Item | **opencliz** (this repository, Zig) | **OpenCLI** upstream (TypeScript) |
 |------|------------------------|------------------------|
+| Project name | **opencliz** (binary **`opencliz`**) | **opencli** on npm / `jackwener/opencli` |
 | Language | **Zig** (single static binary) | **Node.js / TypeScript** |
 | Runtime | None required at install time | Node.js + npm dependencies |
 | Browser integration | **CDP over WebSocket** (Chrome spawned locally, or **external** endpoint e.g. Lightpanda via `OPENCLI_CDP_WEBSOCKET`) | **Browser Bridge Chrome extension** + local daemon WebSocket |
 | Primary goal | Same *vision* (“make any website your CLI”) with **fast cold start** and **low memory**; **not** byte-for-byte clone of upstream | Reference ecosystem and command surface |
 
-**Version**: Use `./zig-out/bin/opencli --version` (source: `src/main.zig` `VERSION`).
+**Version**: Use `./zig-out/bin/opencliz --version` (source: **`src/core/version.zig`** `VERSION`).
 
 ---
 
@@ -23,7 +24,7 @@ For the formal upstream baseline definition, see **`UPSTREAM_REFERENCE.md`**. Fo
 
 ### 2.1 CLI and output
 
-- Command discovery: `opencli list` (live registry; exact command count evolves with YAML).
+- Command discovery: `opencliz list` (live registry; exact command count evolves with YAML).
 - Output formats: `table`, `json`, `yaml`, `markdown`, `csv`, `raw` (where applicable via `-f` / `--format`).
 - Structured outcomes often include JSON fields such as `status`, `detail`, and adapter-specific keys; **semantic parity** with upstream is tracked via scripts and fixtures, not guaranteed for every command without running a diff.
 
@@ -63,7 +64,7 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 
 ### 2.7 Daemon mode
 
-- **`opencli serve`**: HTTP API for remote execution (see **`DAEMON_API.md`**).
+- **`opencliz serve`**: HTTP API for remote execution (see **`DAEMON_API.md`**).
 - **Different** from upstream’s daemon + extension architecture (ports, routes, and “doctor” integration are not matched 1:1).
 
 ### 2.8 External CLIs
@@ -84,7 +85,7 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 | **Browser bridge** | Extension + localhost WebSocket to daemon | **No extension**; **CDP** (`OPENCLI_USE_BROWSER`, optional **`OPENCLI_CDP_WEBSOCKET`**) |
 | **Automation stack** | Playwright / rich browser tooling in places | **CDP client** + scenario matrix; **no Playwright** |
 | **Login session** | Extension can read scoped cookies for commands | Use **HTTP cookies** env vars and/or **log in inside the CDP Chrome profile** (or debugging Chrome you attach to) |
-| **Daemon** | Integrated docs / ports as in upstream | **`opencli serve`** REST subset — see **`DAEMON_API.md`** |
+| **Daemon** | Integrated docs / ports as in upstream | **`opencliz serve`** REST subset — see **`DAEMON_API.md`** |
 | **Exit codes** | Some sysexits-style conventions (e.g. login required) | Often **`status` inside JSON**; exit-code parity is **not** guaranteed |
 | **`operate` / deep AI browser control** | Product features in upstream direction | **Not** replicated as a first-class equivalent |
 | **Plugins** | Node ecosystem assumptions | **QuickJS** + documented HTTP API subset |
@@ -120,7 +121,7 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 | **`advanced/cdp.md`** | Chrome remote debugging, tunnels, `OPENCLI_CDP_WEBSOCKET` |
 | **`MARKDOWN_ARTICLE_PIPELINE.md`** | Article / Markdown export |
 | **`PLUGIN_QUICKJS.md`** | QuickJS plugins |
-| **`DAEMON_API.md`** | `opencli serve` |
+| **`DAEMON_API.md`** | `opencliz serve` |
 | **`AUTH_AND_WRITE_PATH.md`** | Cookies, OAuth/write boundaries |
 | **`TS_ZIG_CAPABILITY_GAP_AND_SCHEDULE.md`** | Scheduled gap work |
 | **`TS_PARITY_99_CAP.md`** | Theoretical parity ceiling and exclusions |
@@ -129,4 +130,4 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 
 ---
 
-*Last updated: 2026-04-01 — maintainers: keep §2 in sync when adding user-visible env vars or subsystems; point version readers to `src/main.zig`.*
+*Last updated: 2026-04-01 — maintainers: keep §2 in sync when adding user-visible env vars or subsystems; version: **`src/core/version.zig`**.*

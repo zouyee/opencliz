@@ -83,12 +83,12 @@ Many cases assumed older Zig `std.process.Child` / `HttpClient` APIs and **may n
 
 | Command | Notes |
 |---------|--------|
-| `./zig-out/bin/opencli --version` | Version string from `src/main.zig` `VERSION` (e.g. **2.2.0**) |
-| `./zig-out/bin/opencli --help` | Help text |
-| `./zig-out/bin/opencli list` | Live command count |
-| `./zig-out/bin/opencli bilibili/hot --limit 3` | Requires network |
-| `./zig-out/bin/opencli hackernews/top --limit 3` | Requires network |
-| `./zig-out/bin/opencli v2ex/hot --limit 3` | Requires network |
+| `./zig-out/bin/opencliz --version` | Version from **`src/core/version.zig`** (e.g. **v0.0.1**) |
+| `./zig-out/bin/opencliz --help` | Help text |
+| `./zig-out/bin/opencliz list` | Live command count |
+| `./zig-out/bin/opencliz bilibili/hot --limit 3` | Requires network |
+| `./zig-out/bin/opencliz hackernews/top --limit 3` | Requires network |
+| `./zig-out/bin/opencliz v2ex/hot --limit 3` | Requires network |
 
 ---
 
@@ -249,9 +249,9 @@ Browser automation is invoked via `OPENCLI_USE_BROWSER=1` environment variable f
 zig build test
 
 # Run integration tests (requires network)
-./zig-out/bin/opencli bilibili/hot --limit 1
-./zig-out/bin/opencli hackernews/top --limit 1
-./zig-out/bin/opencli github/trending --limit 1
+./zig-out/bin/opencliz bilibili/hot --limit 1
+./zig-out/bin/opencliz hackernews/top --limit 1
+./zig-out/bin/opencliz github/trending --limit 1
 ```
 
 ### For Browser Tests (Manual)

@@ -1,11 +1,11 @@
 # news
 
-**Mode**: 🌐 Public · **Domain**: （资讯聚合占位）
+**Mode**: 🌐 Public · **Domain**: _(news aggregation placeholder)_
 
 ## Commands
 
-由内置适配器注册；子命令以 `opencli list` 为准。
+Registered by the built-in adapter; subcommands are listed in `opencliz list`.
 
 ```bash
-opencli list news
+opencliz list news
 ```

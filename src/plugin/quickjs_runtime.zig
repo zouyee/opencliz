@@ -352,7 +352,7 @@ fn evalExpressionToStringWithHttp(allocator: std.mem.Allocator, source: []const 
 }
 
 /// 将命令脚本作为函数体执行：脚本内应使用 `return`；`opencliArgs` 为 CLI 实参对象（`args_json` 须为合法 JSON 对象字面量）。
-/// 注入 **`opencli`**：`opencli.args` 与 `opencliArgs` 相同；`opencli.version` 为 [`opencli_plugin_api_version`]；**`opencli.log(m)`** 经 QuickJS **`print`** 输出（前缀 `[opencli] `），不进入 JSON 返回值。
+/// 注入全局对象 **`opencli`**（名称与 npm 版插件脚本一致；宿主二进制为 **opencliz**）：`opencli.args` 与 `opencliArgs` 相同；`opencli.version` 为 [`opencli_plugin_api_version`]；**`opencli.log(m)`** 经 QuickJS **`print`** 输出（前缀 `[opencli] `），不进入 JSON 返回值。
 /// 可选注入 **`opencli.http`**：当 `OPENCLI_PLUGIN_HTTP=1` 时注入，提供 `get(url)` / `post(url, body)` / `request(method, url, options)` 方法（**`method`** 支持 **GET** / **POST** / **HEAD**；带 URL 白名单验证）。
 pub fn evalPluginHandlerBody(
     allocator: std.mem.Allocator,

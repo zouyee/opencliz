@@ -6,26 +6,26 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli hf top` | Top upvoted Hugging Face papers |
+| `opencliz hf top` | Top upvoted Hugging Face papers |
 
 ## Usage Examples
 
 ```bash
 # Today's top papers
-opencli hf top --limit 10
+opencliz hf top --limit 10
 
 # All papers (no limit)
-opencli hf top --all
+opencliz hf top --all
 
 # Specific date
-opencli hf top --date 2025-03-01
+opencliz hf top --date 2025-03-01
 
 # Weekly/monthly top papers
-opencli hf top --period weekly
-opencli hf top --period monthly
+opencliz hf top --period weekly
+opencliz hf top --period monthly
 
 # JSON output
-opencli hf top -f json
+opencliz hf top -f json
 ```
 
 ### Options

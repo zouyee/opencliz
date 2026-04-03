@@ -6,19 +6,19 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli reuters search` | |
+| `opencliz reuters search` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli reuters search --limit 5
+opencliz reuters search --limit 5
 
 # JSON output
-opencli reuters search -f json
+opencliz reuters search -f json
 
 # Verbose mode
-opencli reuters search -v
+opencliz reuters search -v
 ```
 
 ## Prerequisites

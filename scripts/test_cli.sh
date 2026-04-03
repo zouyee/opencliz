@@ -2,7 +2,7 @@
 # CLI Integration Tests for opencli Zig rewrite
 
 set -e
-BINARY="./zig-out/bin/opencli"
+BINARY="./zig-out/bin/opencliz"
 PASS=0
 FAIL=0
 

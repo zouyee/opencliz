@@ -6,22 +6,22 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli zhihu hot` | |
-| `opencli zhihu search` | |
-| `opencli zhihu question` | |
-| `opencli zhihu download` | |
+| `opencliz zhihu hot` | |
+| `opencliz zhihu search` | |
+| `opencliz zhihu question` | |
+| `opencliz zhihu download` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli zhihu hot --limit 5
+opencliz zhihu hot --limit 5
 
 # JSON output
-opencli zhihu hot -f json
+opencliz zhihu hot -f json
 
 # Verbose mode
-opencli zhihu hot -v
+opencliz zhihu hot -v
 ```
 
 ## Prerequisites

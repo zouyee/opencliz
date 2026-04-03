@@ -1,4 +1,4 @@
-# Xiaohongshu (小红书)
+# Xiaohongshu
 
 **Mode**: 🔐 Browser · **Domain**: `xiaohongshu.com`
 
@@ -6,30 +6,30 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli xiaohongshu search` | Search notes by keyword (returns title, author, likes, URL) |
-| `opencli xiaohongshu notifications` | |
-| `opencli xiaohongshu feed` | |
-| `opencli xiaohongshu user` | |
-| `opencli xiaohongshu download` | |
-| `opencli xiaohongshu creator-notes` | |
-| `opencli xiaohongshu creator-note-detail` | |
-| `opencli xiaohongshu creator-notes-summary` | |
-| `opencli xiaohongshu creator-profile` | |
-| `opencli xiaohongshu creator-stats` | |
+| `opencliz xiaohongshu search` | Search notes by keyword (returns title, author, likes, URL) |
+| `opencliz xiaohongshu notifications` | |
+| `opencliz xiaohongshu feed` | |
+| `opencliz xiaohongshu user` | |
+| `opencliz xiaohongshu download` | |
+| `opencliz xiaohongshu creator-notes` | |
+| `opencliz xiaohongshu creator-note-detail` | |
+| `opencliz xiaohongshu creator-notes-summary` | |
+| `opencliz xiaohongshu creator-profile` | |
+| `opencliz xiaohongshu creator-stats` | |
 
 ## Usage Examples
 
 ```bash
 # Search for notes
-opencli xiaohongshu search 美食 --limit 10
+opencliz xiaohongshu search food --limit 10
 
 # JSON output
-opencli xiaohongshu search 旅行 -f json
+opencliz xiaohongshu search travel -f json
 
 # Other commands
-opencli xiaohongshu feed
-opencli xiaohongshu notifications
-opencli xiaohongshu download <url>
+opencliz xiaohongshu feed
+opencliz xiaohongshu notifications
+opencliz xiaohongshu download <url>
 ```
 
 ## Prerequisites

@@ -2,19 +2,19 @@
 
 **Mode**: 🌐 Public · **Domain**: `registry.npmjs.org` / `api.npmjs.org`
 
-Cookie（可选）：`OPENCLI_NPM_COOKIE`（经 `hostToSiteKey` 映射为站点 `npm`）。
+Cookie (optional): `OPENCLI_NPM_COOKIE` (mapped to site `npm` via `hostToSiteKey`).
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `opencli npm search` | Search packages |
-| `opencli npm info` | Package latest manifest |
-| `opencli npm downloads` | Weekly download point |
+| `opencliz npm search` | Search packages |
+| `opencliz npm info` | Package latest manifest |
+| `opencliz npm downloads` | Weekly download point |
 
 ## Examples
 
 ```bash
-opencli npm search --query react -f json
-opencli npm info --package lodash -f json
+opencliz npm search --query react -f json
+opencliz npm info --package lodash -f json
 ```

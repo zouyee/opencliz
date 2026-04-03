@@ -11,7 +11,7 @@ const config_manager = @import("utils/config.zig");
 const _ = @import("tests.zig");
 
 const OpenCliError = errors.OpenCliError;
-const VERSION = "2.2.0";
+const VERSION = @import("core/version.zig").VERSION;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{ .safety = true }){};
@@ -319,7 +319,7 @@ fn generateAdapter(allocator: std.mem.Allocator, url: []const u8, site_name: []c
 fn startDaemon(allocator: std.mem.Allocator, reg: *types.Registry) !void {
     const dmod = @import("daemon/daemon.zig");
 
-    std.log.info("Starting OpenCLI daemon...", .{});
+    std.log.info("Starting opencliz daemon...", .{});
 
     var port: u16 = 8080;
     if (std.process.getEnvVarOwned(allocator, "OPENCLI_DAEMON_PORT")) |s| {
@@ -382,7 +382,7 @@ fn executeCommand(
     verbose: bool,
 ) !void {
     // 处理内置命令
-    if (std.mem.eql(u8, site, "opencli")) {
+    if (std.mem.eql(u8, site, "opencliz")) {
         if (std.mem.eql(u8, name, "list")) {
             try cli_runner.listCommands(args);
             return;
@@ -441,9 +441,9 @@ fn showHelp() !void {
     const stdout = std.fs.File.stdout().deprecatedWriter();
     try stdout.print(
         \\
-        \\        opencli — Make any website your CLI. AI-powered.
+        \\        opencliz — Zig port; command surface tracks jackwener/opencli. AI-powered helpers.
         \\
-        \\        Usage: opencli [OPTIONS] <COMMAND> [ARGS...]
+        \\        Usage: opencliz [OPTIONS] <COMMAND> [ARGS...]
         \\
         \\        Options:
         \\          -h, --help                    Display this help and exit
@@ -473,29 +473,29 @@ fn showHelp() !void {
         \\          <site>/<command>              Run a site-specific command
         \\
         \\        Examples:
-        \\          opencli list
-        \\          opencli bilibili/hot --limit 5
-        \\          opencli github/trending -f json
-        \\          opencli twitter/timeline --user elonmusk
-        \\          opencli plugin install --github user/my-plugin
-        \\          opencli plugin list
-        \\          opencli plugin update
-        \\          opencli validate --path ./adapters/my-cli.yaml
-        \\          opencli verify --site github
-        \\          opencli record --site github --command trending
-        \\          opencli cascade --site github
-        \\          opencli cascade --site myapi --url https://api.example.com/v1/health
-        \\          opencli --explore https://example.com --explore-out ./ex.json
-        \\          opencli -f json --explore https://example.com > ex.json
-        \\          opencli synthesize --explore ./ex.json --site myapi
-        \\          opencli --generate https://api.example.com --site myapi
+        \\          opencliz list
+        \\          opencliz bilibili/hot --limit 5
+        \\          opencliz github/trending -f json
+        \\          opencliz twitter/timeline --user elonmusk
+        \\          opencliz plugin install --github user/my-plugin
+        \\          opencliz plugin list
+        \\          opencliz plugin update
+        \\          opencliz validate --path ./adapters/my-cli.yaml
+        \\          opencliz verify --site github
+        \\          opencliz record --site github --command trending
+        \\          opencliz cascade --site github
+        \\          opencliz cascade --site myapi --url https://api.example.com/v1/health
+        \\          opencliz --explore https://example.com --explore-out ./ex.json
+        \\          opencliz -f json --explore https://example.com > ex.json
+        \\          opencliz synthesize --explore ./ex.json --site myapi
+        \\          opencliz --generate https://api.example.com --site myapi
         \\
     , .{});
 }
 
 fn showVersion() !void {
     const stdout = std.fs.File.stdout().deprecatedWriter();
-    try stdout.print("opencli version {s} (Zig rewrite)\n", .{VERSION});
+    try stdout.print("opencliz version {s} (Zig; opencliz ≠ npm opencli)\n", .{VERSION});
 }
 
 fn generateCompletions(shell: []const u8) !void {
@@ -504,7 +504,7 @@ fn generateCompletions(shell: []const u8) !void {
     if (std.mem.eql(u8, shell, "bash")) {
         try stdout.writeAll(
             \\
-            \\_opencli_completions() {
+            \\_opencliz_completions() {
             \\    local cur prev opts
             \\    COMPREPLY=()
             \\    cur="${COMP_WORDS[COMP_CWORD]}"
@@ -540,40 +540,40 @@ fn generateCompletions(shell: []const u8) !void {
             \\
             \\    COMPREPLY=( $(compgen -W "${main_commands}" -- ${cur}) )
             \\}
-            \\complete -F _opencli_completions opencli
+            \\complete -F _opencliz_completions opencliz
             \\
         );
     } else if (std.mem.eql(u8, shell, "zsh")) {
-        try stdout.print("#compdef opencli\n\n# Add completions for opencli\n", .{});
+        try stdout.print("#compdef opencliz\n\n# Add completions for opencliz\n", .{});
     } else if (std.mem.eql(u8, shell, "fish")) {
         try stdout.writeAll(
-            \\complete -c opencli -f
-            \\complete -c opencli -n '__fish_use_subcommand' -a 'list doctor version serve plugin validate verify record cascade synthesize'
-            \\complete -c opencli -n '__fish_seen_subcommand_from plugin' -a 'install list uninstall update'
-            \\complete -c opencli -n '__fish_seen_subcommand_from plugin' -l github -d 'Install from GitHub (user/repo)'
-            \\complete -c opencli -n '__fish_seen_subcommand_from plugin' -l path -d 'Install from local path'
-            \\complete -c opencli -n '__fish_seen_subcommand_from plugin' -l name -d 'Plugin name for uninstall/update'
-            \\complete -c opencli -n '__fish_seen_subcommand_from validate' -l path -d 'Adapter YAML path'
-            \\complete -c opencli -n '__fish_seen_subcommand_from verify' -l site -d 'Site name to verify'
-            \\complete -c opencli -n '__fish_seen_subcommand_from record' -l site -d 'Site name to record'
-            \\complete -c opencli -n '__fish_seen_subcommand_from cascade' -l site -d 'Site name to test'
-            \\complete -c opencli -n '__fish_seen_subcommand_from synthesize' -l explore -d 'Explore result JSON file'
-            \\complete -c opencli -n '__fish_seen_subcommand_from synthesize' -l site -d 'Site name for adapter'
-            \\complete -c opencli -n '__fish_use_subcommand' -a 'bilibili' -d 'Bilibili video platform'
-            \\complete -c opencli -n '__fish_seen_subcommand_from bilibili' -a 'hot search user'
-            \\complete -c opencli -n '__fish_use_subcommand' -a 'github' -d 'GitHub code repository'
-            \\complete -c opencli -n '__fish_seen_subcommand_from github' -a 'trending repo'
-            \\complete -c opencli -n '__fish_use_subcommand' -a 'zhihu' -d 'Zhihu Q&A platform'
-            \\complete -c opencli -n '__fish_seen_subcommand_from zhihu' -a 'hot search question user'
-            \\complete -c opencli -n '__fish_use_subcommand' -a 'v2ex' -d 'V2EX'
-            \\complete -c opencli -n '__fish_seen_subcommand_from v2ex' -a 'hot'
-            \\complete -c opencli -l help -s h -d 'Display help'
-            \\complete -c opencli -l version -s v -d 'Display version'
-            \\complete -c opencli -l format -s f -d 'Output format' -xa 'table json yaml csv'
-            \\complete -c opencli -l verbose -d 'Enable verbose output'
-            \\complete -c opencli -l explore -d 'Explore website'
-            \\complete -c opencli -l generate -d 'Generate adapter'
-            \\complete -c opencli -l site -d 'Site name'
+            \\complete -c opencliz -f
+            \\complete -c opencliz -n '__fish_use_subcommand' -a 'list doctor version serve plugin validate verify record cascade synthesize'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from plugin' -a 'install list uninstall update'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from plugin' -l github -d 'Install from GitHub (user/repo)'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from plugin' -l path -d 'Install from local path'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from plugin' -l name -d 'Plugin name for uninstall/update'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from validate' -l path -d 'Adapter YAML path'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from verify' -l site -d 'Site name to verify'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from record' -l site -d 'Site name to record'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from cascade' -l site -d 'Site name to test'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from synthesize' -l explore -d 'Explore result JSON file'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from synthesize' -l site -d 'Site name for adapter'
+            \\complete -c opencliz -n '__fish_use_subcommand' -a 'bilibili' -d 'Bilibili video platform'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from bilibili' -a 'hot search user'
+            \\complete -c opencliz -n '__fish_use_subcommand' -a 'github' -d 'GitHub code repository'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from github' -a 'trending repo'
+            \\complete -c opencliz -n '__fish_use_subcommand' -a 'zhihu' -d 'Zhihu Q&A platform'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from zhihu' -a 'hot search question user'
+            \\complete -c opencliz -n '__fish_use_subcommand' -a 'v2ex' -d 'V2EX'
+            \\complete -c opencliz -n '__fish_seen_subcommand_from v2ex' -a 'hot'
+            \\complete -c opencliz -l help -s h -d 'Display help'
+            \\complete -c opencliz -l version -s v -d 'Display version'
+            \\complete -c opencliz -l format -s f -d 'Output format' -xa 'table json yaml csv'
+            \\complete -c opencliz -l verbose -d 'Enable verbose output'
+            \\complete -c opencliz -l explore -d 'Explore website'
+            \\complete -c opencliz -l generate -d 'Generate adapter'
+            \\complete -c opencliz -l site -d 'Site name'
             \\
         );
     } else {
@@ -611,19 +611,19 @@ fn parseCommand(command: []const u8, positionals: []const []const u8, index: *us
                     index.* += 1;
                     const full_name = try std.fmt.allocPrint(std.heap.page_allocator, "plugin/{s}", .{subcmd});
                     return CommandParts{
-                        .site = "opencli",
+                        .site = "opencliz",
                         .name = full_name,
                     };
                 }
                 // No subcommand provided, default to "list"
                 return CommandParts{
-                    .site = "opencli",
+                    .site = "opencliz",
                     .name = "plugin/list",
                 };
             }
 
             return CommandParts{
-                .site = "opencli",
+                .site = "opencliz",
                 .name = command,
             };
         }
@@ -638,14 +638,14 @@ fn parseCommand(command: []const u8, positionals: []const []const u8, index: *us
     }
 
     return CommandParts{
-        .site = "opencli",
+        .site = "opencliz",
         .name = command,
     };
 }
 
 fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     const list_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "list",
         .description = "List all available commands",
         .domain = "",
@@ -655,7 +655,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(list_cmd);
 
     const doctor_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "doctor",
         .description = "Diagnose and auto-start services",
         .domain = "",
@@ -665,7 +665,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(doctor_cmd);
 
     const version_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "version",
         .description = "Show version information",
         .domain = "",
@@ -676,7 +676,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
 
     // Plugin commands
     const plugin_install_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "plugin/install",
         .description = "Install a plugin from GitHub or local path",
         .domain = "",
@@ -686,7 +686,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(plugin_install_cmd);
 
     const plugin_list_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "plugin/list",
         .description = "List all installed plugins",
         .domain = "",
@@ -696,7 +696,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(plugin_list_cmd);
 
     const plugin_uninstall_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "plugin/uninstall",
         .description = "Uninstall a plugin",
         .domain = "",
@@ -706,7 +706,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(plugin_uninstall_cmd);
 
     const plugin_update_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "plugin/update",
         .description = "Update installed plugins",
         .domain = "",
@@ -717,7 +717,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
 
     // Validation and verification commands
     const validate_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "validate",
         .description = "Validate adapter configuration",
         .domain = "",
@@ -727,7 +727,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(validate_cmd);
 
     const verify_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "verify",
         .description = "Verify adapter functionality",
         .domain = "",
@@ -737,7 +737,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(verify_cmd);
 
     const record_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "record",
         .description = "Record API requests for testing",
         .domain = "",
@@ -747,7 +747,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(record_cmd);
 
     const cascade_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "cascade",
         .description = "Test authentication strategies",
         .domain = "",
@@ -757,7 +757,7 @@ fn registerBuiltinCommands(cli_runner: *runner.CliRunner) !void {
     try cli_runner.registerCommand(cascade_cmd);
 
     const synthesize_cmd = types.Command{
-        .site = "opencli",
+        .site = "opencliz",
         .name = "synthesize",
         .description = "Generate adapter from explore results",
         .domain = "",

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# OpenCLI Zig Build Script
+# opencliz (Zig) build script
 # Usage: ./build.sh [command]
 
 set -e
@@ -15,7 +15,7 @@ COMMAND=${1:-build}
 print_header() {
     echo ""
     echo "================================"
-    echo "  OpenCLI Zig Build System"
+    echo "  opencliz build"
     echo "================================"
     echo ""
 }
@@ -23,16 +23,16 @@ print_header() {
 case $COMMAND in
     build)
         print_header
-        echo "Building OpenCLI..."
+        echo "Building opencliz..."
         zig build -Doptimize=ReleaseFast
         echo "✓ Build complete"
         echo ""
-        echo "Binary location: zig-out/bin/opencli"
+        echo "Binary location: zig-out/bin/opencliz"
         ;;
     
     debug)
         print_header
-        echo "Building OpenCLI (Debug mode)..."
+        echo "Building opencliz (Debug)..."
         zig build
         echo "✓ Build complete (Debug)"
         ;;
@@ -49,7 +49,7 @@ case $COMMAND in
     
     install)
         print_header
-        echo "Installing OpenCLI..."
+        echo "Installing opencliz..."
         zig build install
         
         # 创建配置目录
@@ -74,7 +74,7 @@ case $COMMAND in
     run)
         shift
         print_header
-        echo "Running OpenCLI..."
+        echo "Running opencliz..."
         zig build run -- "$@"
         ;;
     

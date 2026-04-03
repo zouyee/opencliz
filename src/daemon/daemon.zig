@@ -349,7 +349,7 @@ pub const RequestHandler = struct {
         _ = self;
         return http.Response{
             .status = 200,
-            .body = "{\"name\": \"OpenCLI Daemon\", \"version\": \"2.2.0\", \"status\": \"running\"}",
+            .body = "{\"name\": \"opencliz daemon\", \"version\": \"v0.0.1\", \"status\": \"running\"}",
             .content_type = "application/json",
         };
     }

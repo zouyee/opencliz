@@ -31,7 +31,7 @@ fn runCli(args: []const []const u8) !struct { stdout: []u8, stderr: []u8, exit_c
 
 // Test that the CLI binary exists and responds to --version
 test "integration: CLI binary --version works" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "--version" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "--version" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -39,13 +39,13 @@ test "integration: CLI binary --version works" {
 
     try std.testing.expect(result.exit_code == 0);
     try std.testing.expect(result.stdout.len > 0);
-    // Version output should contain "opencli"
-    try std.testing.expect(std.mem.containsAtLeast(u8, result.stdout, 1, "opencli"));
+    // Version output should identify opencliz
+    try std.testing.expect(std.mem.containsAtLeast(u8, result.stdout, 1, "opencliz"));
 }
 
 // Test that the CLI binary responds to --help
 test "integration: CLI binary --help works" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "--help" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "--help" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -57,7 +57,7 @@ test "integration: CLI binary --help works" {
 
 // Test that the CLI binary --list shows commands
 test "integration: CLI list shows commands" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "list" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "list" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -71,7 +71,7 @@ test "integration: CLI list shows commands" {
 
 // Test bilibili hot command with real API call
 test "integration: bilibili/hot returns data" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "bilibili/hot", "--limit", "3" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "bilibili/hot", "--limit", "3" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -88,7 +88,7 @@ test "integration: bilibili/hot returns data" {
 
 // Test bilibili/hot with JSON format
 test "integration: bilibili/hot JSON format" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "bilibili/hot", "--limit", "2", "--format", "json" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "bilibili/hot", "--limit", "2", "--format", "json" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -105,7 +105,7 @@ test "integration: bilibili/hot JSON format" {
 
 // Test hackernews/top command with real API call
 test "integration: hackernews/top returns data" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "hackernews/top", "--limit", "3" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "hackernews/top", "--limit", "3" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -117,7 +117,7 @@ test "integration: hackernews/top returns data" {
 
 // Test v2ex/hot command with real API call
 test "integration: v2ex/hot returns data" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "v2ex/hot", "--limit", "3" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "v2ex/hot", "--limit", "3" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -129,7 +129,7 @@ test "integration: v2ex/hot returns data" {
 
 // Test reddit/hot command with real API call
 test "integration: reddit/hot returns data" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "reddit/hot", "--limit", "3" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "reddit/hot", "--limit", "3" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -141,7 +141,7 @@ test "integration: reddit/hot returns data" {
 
 // Test stackoverflow/search command with real API call
 test "integration: stackoverflow/search returns data" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "stackoverflow/search", "--query", "zig language", "--limit", "2" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "stackoverflow/search", "--query", "zig language", "--limit", "2" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -153,7 +153,7 @@ test "integration: stackoverflow/search returns data" {
 
 // Test npm/search command with real API call
 test "integration: npm/search returns data" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "npm/search", "--query", "zig", "--limit", "3" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "npm/search", "--query", "zig", "--limit", "3" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -165,7 +165,7 @@ test "integration: npm/search returns data" {
 
 // Test github/trending command with real API call
 test "integration: github/trending returns data" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "github/trending", "--language", "rust", "--limit", "3" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "github/trending", "--language", "rust", "--limit", "3" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -177,7 +177,7 @@ test "integration: github/trending returns data" {
 
 // Test unknown command returns error
 test "integration: unknown command returns error" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "unknown/site", "cmd" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "unknown/site", "cmd" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -189,7 +189,7 @@ test "integration: unknown command returns error" {
 
 // Test with verbose flag
 test "integration: verbose flag works" {
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "--verbose", "bilibili/hot", "--limit", "1" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "--verbose", "bilibili/hot", "--limit", "1" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);
@@ -339,7 +339,7 @@ test "integration: Non-existent host returns error" {
 test "integration: CLI startup time is fast" {
     const timer = std.time.Timer.start() catch @panic("Timer init failed");
 
-    const result = try runCli(&.{ "./zig-out/bin/opencli", "--version" });
+    const result = try runCli(&.{ "./zig-out/bin/opencliz", "--version" });
     defer {
         std.testing.allocator.free(result.stdout);
         std.testing.allocator.free(result.stderr);

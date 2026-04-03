@@ -4,8 +4,8 @@
 
 ## Commands
 
-由内置适配器注册；子命令以 `opencli list` 为准。
+Registered by the built-in adapter; subcommands are listed in `opencliz list`.
 
 ```bash
-opencli list producthunt
+opencliz list producthunt
 ```

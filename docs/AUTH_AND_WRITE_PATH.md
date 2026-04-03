@@ -1,149 +1,153 @@
-# 认证与写路径（阶段 D 基线）
+# Authentication and write paths (phase D baseline)
 
-> Zig 版与 TS 版对齐的**能力边界**：公开读优先；登录态与写操作依赖环境变量或后续专项，不保证每站与旧版 Node 行为一致。
+> **Capability boundary** for parity with the TypeScript upstream: public reads first; logged-in and write operations depend on environment variables or follow-up work. Per-site behavior is not guaranteed to match the legacy Node build.
 
-## 已支持机制
+## Supported mechanisms
 
-| 机制 | 环境变量 / 行为 |
-|------|-----------------|
-| 通用 Cookie 头 | `OPENCLI_COOKIE`、`OPENCLI_COOKIE_FILE` |
-| 按站点 Cookie | `OPENCLI_<SITE>_COOKIE`（站点名大写，`-`→`_`） |
-| HTTP 请求前注入 | `HttpClient.request` 按 URL host 映射 `hostToSiteKey`（见 `src/http/client.zig`） |
-| 策略字段 | `AuthStrategy`：`public` / `cookie` / `header` / `oauth` / `api_key`（YAML/类型层） |
+| Mechanism | Environment / behavior |
+|-----------|------------------------|
+| Generic Cookie header | `OPENCLI_COOKIE`, `OPENCLI_COOKIE_FILE` |
+| Per-site Cookie | `OPENCLI_<SITE>_COOKIE` (uppercase site, `-` → `_`) |
+| Pre-request injection | `HttpClient.request` maps URL host via `hostToSiteKey` (see `src/http/client.zig`) |
+| Strategy field | `AuthStrategy`: `public` / `cookie` / `header` / `oauth` / `api_key` (YAML / type layer) |
 
-## 结构化状态（非裸 `todo`）
+## Structured status (not bare `todo`)
 
-命令在缺登录、缺参数或仅 CDP 可用时，应返回带 **`status`** 的 JSON（如 `login_required`、`need_argument`、`http_or_cdp`、`login_or_browser` 等），便于脚本与 TS 侧对照。
+When login is missing, arguments are incomplete, or only CDP is viable, commands should return JSON with **`status`** (e.g. `login_required`, `need_argument`, `http_or_cdp`, `login_or_browser`) so scripts and the TS side can compare behavior.
 
-## 写路径（Reddit / 即刻 / 微信等）
+## Write paths (Reddit, Jike, WeChat, etc.)
 
-- **默认**：注册名对齐，执行链可能为占位或仅 URL；需在 **有 Token/Cookie** 的环境做站点级集成测试。
-- **里程碑**：按站点开 issue：请求格式、风控、官方 API 变更。
+- **By default**: registered names align; the execution chain may be a stub or URL-only. Run site-level integration tests in an environment **with Token/Cookie**.
+- **Milestones**: open issues per site for request shape, risk controls, and upstream API changes.
 
-### 写路径 Cookie 手工回归步骤
+### Manual Cookie regression for write paths
 
 > 2026-04-01  
-> 命令速查：**`scripts/regression_cookie_writepath.sh`**（与下文一致）。
+> Command cheat sheet: **`scripts/regression_cookie_writepath.sh`** (same as below).
 
-以下写路径命令需要 Cookie 认证。手工回归测试步骤：
+The following write-path commands need Cookie authentication. Manual regression steps:
 
-#### Reddit 写操作
+#### Reddit writes
 
 ```bash
-# 1. 获取 Reddit 登录 Cookie（通过浏览器开发者工具）
-# 2. 设置 Cookie
+# 1. Obtain Reddit session cookie (browser devtools)
+# 2. Set cookie
 export OPENCLI_COOKIE="reddit_session_cookie_here"
 
-# 3. 测试 upvote
-./zig-out/bin/opencli reddit/upvote --post-id "t3_abc123" --direction up -f json
+# 3. Test upvote
+./zig-out/bin/opencliz reddit/upvote --post-id "t3_abc123" --direction up -f json
 
-# 4. 测试 downvote  
-./zig-out/bin/opencli reddit/upvote --post-id "t3_abc123" --direction none -f json
+# 4. Test downvote  
+./zig-out/bin/opencliz reddit/upvote --post-id "t3_abc123" --direction none -f json
 
-# 5. 测试 save
-./zig-out/bin/opencli reddit/save --post-id "t3_abc123" -f json
+# 5. Test save
+./zig-out/bin/opencliz reddit/save --post-id "t3_abc123" -f json
 
-# 6. 测试 comment（需要浏览器）
+# 6. Test comment (browser required)
 export OPENCLI_USE_BROWSER=1
-./zig-out/bin/opencli reddit/comment --post-id "t3_abc123" --text "Test comment" -f json
+./zig-out/bin/opencliz reddit/comment --post-id "t3_abc123" --text "Test comment" -f json
 ```
 
-**预期结果**：
-- 有 Cookie：返回 `{"action":"upvote","status":"ok",...}` 或类似
-- 无 Cookie：返回 `{"action":"upvote","status":"login_required",...}`
+**Expected:**
 
-#### Bilibili 收藏夹
+- With Cookie: `{"action":"upvote","status":"ok",...}` or similar
+- Without Cookie: `{"action":"upvote","status":"login_required",...}`
+
+#### Bilibili favorites
 
 ```bash
-# 1. 设置 B 站 Cookie
+# 1. Set Bilibili cookie
 export OPENCLI_BILIBILI_COOKIE="bilibili_session_cookie_here"
 
-# 2. 测试收藏夹读取（公开 UID）
-./zig-out/bin/opencli bilibili/favorite --uid 123456 --limit 5 -f json
+# 2. Read favorites (public UID)
+./zig-out/bin/opencliz bilibili/favorite --uid 123456 --limit 5 -f json
 
-# 3. 测试收藏夹读取（需登录的私有收藏）
-./zig-out/bin/opencli bilibili/favorite --limit 5 -f json
+# 3. Read favorites (private lists need login)
+./zig-out/bin/opencliz bilibili/favorite --limit 5 -f json
 ```
 
-#### V2EX 通知
+#### V2EX notifications
 
 ```bash
-# 1. 设置 V2EX Cookie
+# 1. Set V2EX cookie
 export OPENCLI_V2EX_COOKIE="v2ex_session_cookie_here"
 
-# 2. 测试通知读取
-./zig-out/bin/opencli v2ex/notifications --limit 10 -f json
+# 2. Read notifications
+./zig-out/bin/opencliz v2ex/notifications --limit 10 -f json
 
-# 3. 测试个人资料
-./zig-out/bin/opencli v2ex/me -f json
+# 3. Profile
+./zig-out/bin/opencliz v2ex/me -f json
 ```
 
-**回归检查清单**：
-- [ ] Cookie 正确注入到请求头
-- [ ] 返回 `status` 字段（非裸 `todo`）
-- [ ] 公开数据在无 Cookie 时正确返回 `login_required`
-- [ ] 写操作返回结构化状态（`ok`/`pending`/`login_required`）
+**Regression checklist:**
 
-## OAuth / Device flow
+- [ ] Cookie is injected into request headers
+- [ ] Response includes `status` (not bare `todo`)
+- [ ] Public data returns `login_required` when unauthenticated where appropriate
+- [ ] Writes return structured status (`ok` / `pending` / `login_required`)
 
-- **当前**：未在 Zig 内嵌完整 OAuth 应用流程；推荐外部拿 Token 后注入 Cookie/Header。
-- **后续**：可在 `docs/TS_PARITY_MIGRATION_PLAN.md` 阶段 D 拆分子里程碑。
+## OAuth / device flow
 
-### 显式「不实现设备码」签字
+- **Today**: no full in-process OAuth app flow in Zig; obtain tokens externally and inject via Cookie/Header.
+- **Later**: can split sub-milestones under phase D in `docs/TS_PARITY_MIGRATION_PLAN.md`.
 
-以下 OAuth 能力**本仓库明确不实现**（2026-04-01 签字）：
+### Explicit “no device code” sign-off
 
-| 站点 | TS 版能力 | Zig 版现状 | 签字 |
-|------|-----------|------------|------|
-| Twitter/X | OAuth 1.0a / OAuth 2.0 | Cookie 注入可用；**无内嵌 OAuth 流程** | ✅ 不实现设备码 |
-| Reddit | OAuth 2.0 | Cookie 注入可用；**无内嵌 OAuth 流程** | ✅ 不实现设备码 |
-| GitHub | OAuth 2.0 | Cookie 注入可用；**无内嵌 OAuth 流程** | ✅ 不实现设备码 |
-| 微信 | 公众号 OAuth | Cookie 注入可用；**无内嵌 OAuth 流程** | ✅ 不实现设备码 |
-| Bilibili | OAuth 2.0 | Cookie 注入可用；**无内嵌 OAuth 流程** | ✅ 不实现设备码 |
+The following OAuth capabilities are **explicitly out of scope** for this repository (signed 2026-04-01):
 
-### OAuth / Device flow 决策签字（Wave 2.2）
+| Site | TS capability | Zig today | Sign-off |
+|------|---------------|-----------|----------|
+| Twitter/X | OAuth 1.0a / OAuth 2.0 | Cookie injection works; **no embedded OAuth** | ✅ No device code |
+| Reddit | OAuth 2.0 | Same | ✅ No device code |
+| GitHub | OAuth 2.0 | Same | ✅ No device code |
+| WeChat | Official account OAuth | Same | ✅ No device code |
+| Bilibili | OAuth 2.0 | Same | ✅ No device code |
+
+### OAuth / device flow decisions (Wave 2.2)
 
 > 2026-04-02
 
-| 站点 | 决策 | 理由 | 签字 | 日期 |
-|------|------|------|------|------|
-| bilibili | 不实现设备码 | 用户自行管理 Token；Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
-| github | 不实现设备码 | Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
-| reddit | 不实现设备码 | Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
-| twitter | 不实现设备码 | Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
+| Site | Decision | Rationale | Sign | Date |
+|------|----------|-----------|------|------|
+| bilibili | No device code | Users manage tokens; Cookie/Header sufficient | ZZ | 2026-04-02 |
+| github | No device code | Same | ZZ | 2026-04-02 |
+| reddit | No device code | Same | ZZ | 2026-04-02 |
+| twitter | No device code | Same | ZZ | 2026-04-02 |
 
-**替代方案**：
+**Alternatives:**
+
 ```bash
-# 用户自行获取 Token 后通过 Cookie/Header 注入
+# After obtaining a token, inject via Cookie/Header
 export OPENCLI_COOKIE="your_session_cookie"
 export OPENCLI_<SITE>_COOKIE="your_site_specific_cookie"
 ```
 
-**不实现原因**：
-1. OAuth 流程需要处理回调 URL、状态参数、安全密钥等，增加复杂度和安全风险
-2. 用户应自行管理 Token，通过环境变量注入
-3. 与开源项目「零依赖」原则一致
+**Why not implement:**
+
+1. OAuth needs callback URLs, state, secrets—more complexity and risk.
+2. Users should own tokens and inject via env.
+3. Aligns with a minimal-dependency open-source stance.
 
 ---
 
-## P1：高频站点读/写边界签字矩阵
+## P1: High-traffic site read/write boundary matrix
 
-> **用途**：把「Zig 与 TS 在登录态、写路径、浏览器依赖上能承诺什么」收敛成**可引用的一页**（**非**字节级与 TS 一致）。与 **`docs/CDP_SCENARIO_MATRIX.md`**、**`scripts/regression_cookie_writepath.sh`** 并用。  
-> **签字**：ZZ · **2026-04-01**
+> **Purpose**: One page you can cite for what Zig vs TS can promise on login, writes, and browser dependence (**not** byte-identical to TS). Use with **`docs/CDP_SCENARIO_MATRIX.md`** and **`scripts/regression_cookie_writepath.sh`**.  
+> **Sign-off**: ZZ · **2026-04-01**
 
-| 站点/域 | 公开读（无 Cookie） | 需登录读 | 写路径（Zig） | 与 TS 对齐方式 | 备注 |
-|---------|---------------------|----------|---------------|----------------|------|
-| HN / npm / PyPI / crates / SO 公开 API 等 | ✅ HTTP 适配器为主 | — | 一般无 | L2 fixture + **`compare_command_json.sh`** | 改版以 **`status`** 为准 |
-| GitHub（公开） | ✅ | 私有仓库等 | 无内嵌 OAuth | **`OPENCLI_GITHUB_COOKIE`**；设备码 **不实现**（Wave 2.2） | 与 TS 私有 API 深度 **不承诺** |
-| Bilibili | ✅ 部分接口 | 收藏夹/账号维度 | 注册对齐 | **`OPENCLI_BILIBILI_COOKIE`**；见上文回归 | 风控/字段漂移见 issue |
-| V2EX | ✅ 列表等 | 通知 / `me` | 读为主 | **`OPENCLI_V2EX_COOKIE`** | 见上文回归 |
-| Reddit | ✅ 部分 | 关注流等 | upvote/save/comment 等 | **`OPENCLI_COOKIE`** 或站点变量 | 见 **`regression_cookie_writepath.sh`** |
-| 知乎 / 微博 / Twitter(X) | ⚠️ 易登录壳/反爬 | ✅ | 写 **不承诺**全量 | Cookie + 可选 **`OPENCLI_USE_BROWSER=1`**；**无设备码** | 与 TS Playwright 深度 **不对等** |
-| 微信 / weixin | ⚠️ 多依赖 CDP 或 Cookie | ✅ | 矩阵内场景 | **`CDP_SCENARIO_MATRIX.md`** | 仅认矩阵勾选 |
-| 即刻、豆包/ChatWise 桌面等 | 视 YAML | 混合 | 写路径 **不保证** | **`desktop_exec`** + 本机环境 | 见 **`MIGRATION_GAP`** |
+| Site / domain | Public read (no Cookie) | Logged-in read | Write path (Zig) | TS alignment | Notes |
+|---------------|-------------------------|----------------|------------------|--------------|-------|
+| HN / npm / PyPI / crates / SO public APIs, etc. | ✅ Mostly HTTP adapters | — | Usually none | L2 fixtures + **`compare_command_json.sh`** | Drift: use **`status`** |
+| GitHub (public) | ✅ | Private repos, etc. | No embedded OAuth | **`OPENCLI_GITHUB_COOKIE`**; no device code (Wave 2.2) | Deep private API parity **not** promised |
+| Bilibili | ✅ Partial APIs | Favorites / account scope | Names aligned | **`OPENCLI_BILIBILI_COOKIE`**; regression above | Risk/field drift → issues |
+| V2EX | ✅ Lists, etc. | Notifications / `me` | Mostly read | **`OPENCLI_V2EX_COOKIE`** | See regression above |
+| Reddit | ✅ Partial | Feeds, etc. | upvote/save/comment, etc. | **`OPENCLI_COOKIE`** or site vars | See **`regression_cookie_writepath.sh`** |
+| Zhihu / Weibo / Twitter(X) | ⚠️ Login shells / anti-bot | ✅ | Writes **not** fully promised | Cookie + optional **`OPENCLI_USE_BROWSER=1`**; **no device code** | Not deep-equivalent to TS Playwright |
+| WeChat / weixin | ⚠️ Often CDP or Cookie | ✅ | Matrix scenarios only | **`CDP_SCENARIO_MATRIX.md`** | Only signed matrix rows |
+| Jike, Doubao / ChatWise desktop, etc. | Per YAML | Mixed | Writes **not** guaranteed | **`desktop_exec`** + local env | See **`MIGRATION_GAP`** |
 
-**验收口径**：无凭据时返回结构化 **`status`**（如 **`login_required`**），**不**使用裸字符串 **`todo`**；有凭据时以各站 **`regression_cookie_writepath.sh`** 与手工步骤为准。
+**Acceptance**: without credentials, return structured **`status`** (e.g. **`login_required`**), **not** bare **`todo`**; with credentials, follow per-site **`regression_cookie_writepath.sh`** and the manual steps above.
 
 ---
 
-*阶段 D 文档基线；细节随 `docs/MIGRATION_GAP.md` 更新。*
+*Phase D doc baseline; details track `docs/MIGRATION_GAP.md`.*

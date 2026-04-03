@@ -1,4 +1,4 @@
-# WeChat (微信公众号)
+# WeChat (official accounts)
 
 **Mode**: 🔐 Browser · **Domain**: `mp.weixin.qq.com`
 
@@ -6,19 +6,19 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli weixin download` | 下载微信公众号文章为 Markdown 格式 |
+| `opencliz weixin download` | Download a WeChat article as Markdown |
 
 ## Usage Examples
 
 ```bash
 # Export article to Markdown
-opencli weixin download --url "https://mp.weixin.qq.com/s/xxx" --output ./weixin
+opencliz weixin download --url "https://mp.weixin.qq.com/s/xxx" --output ./weixin
 
 # Export with locally downloaded images
-opencli weixin download --url "https://mp.weixin.qq.com/s/xxx" --download-images
+opencliz weixin download --url "https://mp.weixin.qq.com/s/xxx" --download-images
 
 # Export without images
-opencli weixin download --url "https://mp.weixin.qq.com/s/xxx" --no-download-images
+opencliz weixin download --url "https://mp.weixin.qq.com/s/xxx" --no-download-images
 ```
 
 ## Output

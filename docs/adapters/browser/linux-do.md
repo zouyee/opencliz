@@ -6,37 +6,37 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli linux-do hot` | 热门话题 |
-| `opencli linux-do latest` | 最新话题 |
-| `opencli linux-do categories` | 板块列表 |
-| `opencli linux-do category` | 板块话题 |
-| `opencli linux-do search` | 搜索话题 |
-| `opencli linux-do topic` | 话题详情 |
+| `opencliz linux-do hot` | Hot topics |
+| `opencliz linux-do latest` | Latest topics |
+| `opencliz linux-do categories` | Category list |
+| `opencliz linux-do category` | Topics in a category |
+| `opencliz linux-do search` | Search topics |
+| `opencliz linux-do topic` | Topic detail |
 
 ## Usage Examples
 
 ```bash
 # Hot topics this week
-opencli linux-do hot --limit 20
+opencliz linux-do hot --limit 20
 
 # Hot topics by period
-opencli linux-do hot --period daily
-opencli linux-do hot --period monthly
+opencliz linux-do hot --period daily
+opencliz linux-do hot --period monthly
 
 # Latest topics
-opencli linux-do latest --limit 10
+opencliz linux-do latest --limit 10
 
 # List all categories
-opencli linux-do categories
+opencliz linux-do categories
 
 # Search topics
-opencli linux-do search "NixOS"
+opencliz linux-do search "NixOS"
 
 # View topic details
-opencli linux-do topic 12345
+opencliz linux-do topic 12345
 
 # JSON output
-opencli linux-do hot -f json
+opencliz linux-do hot -f json
 ```
 
 ## Prerequisites

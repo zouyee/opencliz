@@ -8,42 +8,42 @@ AI image/video generation and editing on [yollomi.com](https://yollomi.com). Use
 
 | Command | Description |
 |---------|-------------|
-| `opencli yollomi generate` | Text-to-image / image-to-image |
-| `opencli yollomi video` | Text-to-video / image-to-video |
-| `opencli yollomi edit` | Qwen image edit (prompt + image) |
-| `opencli yollomi upload` | Upload a local file → public URL for other commands |
-| `opencli yollomi models` | List image / video / tool models and credit costs |
-| `opencli yollomi remove-bg` | Remove background (free) |
-| `opencli yollomi upscale` | Image upscaling |
-| `opencli yollomi face-swap` | Face swap between two images |
-| `opencli yollomi restore` | Photo restoration |
-| `opencli yollomi try-on` | Virtual try-on |
-| `opencli yollomi background` | AI background for product/object images |
-| `opencli yollomi object-remover` | Remove objects (image + mask URLs) |
+| `opencliz yollomi generate` | Text-to-image / image-to-image |
+| `opencliz yollomi video` | Text-to-video / image-to-video |
+| `opencliz yollomi edit` | Qwen image edit (prompt + image) |
+| `opencliz yollomi upload` | Upload a local file → public URL for other commands |
+| `opencliz yollomi models` | List image / video / tool models and credit costs |
+| `opencliz yollomi remove-bg` | Remove background (free) |
+| `opencliz yollomi upscale` | Image upscaling |
+| `opencliz yollomi face-swap` | Face swap between two images |
+| `opencliz yollomi restore` | Photo restoration |
+| `opencliz yollomi try-on` | Virtual try-on |
+| `opencliz yollomi background` | AI background for product/object images |
+| `opencliz yollomi object-remover` | Remove objects (image + mask URLs) |
 
 ## Usage Examples
 
 ```bash
 # List models
-opencli yollomi models --type image
+opencliz yollomi models --type image
 
 # Text-to-image (default model: z-image-turbo)
-opencli yollomi generate "a red apple on a wooden table"
+opencliz yollomi generate "a red apple on a wooden table"
 
 # Choose model and aspect ratio
-opencli yollomi generate "sunset" --model flux-schnell --ratio 16:9
+opencliz yollomi generate "sunset" --model flux-schnell --ratio 16:9
 
 # Image-to-image: upload first, then pass URL
-opencli yollomi upload ./photo.png
-opencli yollomi generate "oil painting style" --model flux-2-pro --image "https://..."
+opencliz yollomi upload ./photo.png
+opencliz yollomi generate "oil painting style" --model flux-2-pro --image "https://..."
 
 # Video
-opencli yollomi video "waves on a beach" --model kling-2-1
+opencliz yollomi video "waves on a beach" --model kling-2-1
 
 # Tools
-opencli yollomi remove-bg https://example.com/image.png
-opencli yollomi upscale https://example.com/image.png --scale 4
-opencli yollomi edit https://example.com/in.png "make it vintage"
+opencliz yollomi remove-bg https://example.com/image.png
+opencliz yollomi upscale https://example.com/image.png --scale 4
+opencliz yollomi edit https://example.com/in.png "make it vintage"
 ```
 
 ### Common options

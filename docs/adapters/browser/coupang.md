@@ -6,20 +6,20 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli coupang search` | |
-| `opencli coupang add-to-cart` | |
+| `opencliz coupang search` | |
+| `opencliz coupang add-to-cart` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli coupang search --limit 5
+opencliz coupang search --limit 5
 
 # JSON output
-opencli coupang search -f json
+opencliz coupang search -f json
 
 # Verbose mode
-opencli coupang search -v
+opencliz coupang search -v
 ```
 
 ## Prerequisites

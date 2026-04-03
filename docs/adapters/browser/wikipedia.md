@@ -6,23 +6,23 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli wikipedia search` | Search Wikipedia articles |
-| `opencli wikipedia summary` | Get Wikipedia article summary |
+| `opencliz wikipedia search` | Search Wikipedia articles |
+| `opencliz wikipedia summary` | Get Wikipedia article summary |
 
 ## Usage Examples
 
 ```bash
 # Search articles
-opencli wikipedia search "quantum computing" --limit 10
+opencliz wikipedia search "quantum computing" --limit 10
 
 # Get article summary
-opencli wikipedia summary "Artificial intelligence"
+opencliz wikipedia summary "Artificial intelligence"
 
 # Use with other languages
-opencli wikipedia search "人工智能" --lang zh
+opencliz wikipedia search "Shanghai" --lang zh
 
 # JSON output
-opencli wikipedia search "Rust" -f json
+opencliz wikipedia search "Rust" -f json
 ```
 
 ## Prerequisites

@@ -6,16 +6,16 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli bloomberg main` | Bloomberg homepage top stories from RSS |
-| `opencli bloomberg markets` | Bloomberg Markets top stories from RSS |
-| `opencli bloomberg economics` | Bloomberg Economics top stories from RSS |
-| `opencli bloomberg industries` | Bloomberg Industries top stories from RSS |
-| `opencli bloomberg tech` | Bloomberg Tech top stories from RSS |
-| `opencli bloomberg politics` | Bloomberg Politics top stories from RSS |
-| `opencli bloomberg businessweek` | Bloomberg Businessweek top stories from RSS |
-| `opencli bloomberg opinions` | Bloomberg Opinion top stories from RSS |
-| `opencli bloomberg feeds` | List the RSS feed aliases used by the adapter |
-| `opencli bloomberg news <link>` | Read a standard Bloomberg story/article page and return title, summary, media links, and article text |
+| `opencliz bloomberg main` | Bloomberg homepage top stories from RSS |
+| `opencliz bloomberg markets` | Bloomberg Markets top stories from RSS |
+| `opencliz bloomberg economics` | Bloomberg Economics top stories from RSS |
+| `opencliz bloomberg industries` | Bloomberg Industries top stories from RSS |
+| `opencliz bloomberg tech` | Bloomberg Tech top stories from RSS |
+| `opencliz bloomberg politics` | Bloomberg Politics top stories from RSS |
+| `opencliz bloomberg businessweek` | Bloomberg Businessweek top stories from RSS |
+| `opencliz bloomberg opinions` | Bloomberg Opinion top stories from RSS |
+| `opencliz bloomberg feeds` | List the RSS feed aliases used by the adapter |
+| `opencliz bloomberg news <link>` | Read a standard Bloomberg story/article page and return title, summary, media links, and article text |
 
 ## What works today
 
@@ -41,19 +41,19 @@
 
 ```bash
 # List supported RSS feed aliases
-opencli bloomberg feeds
+opencliz bloomberg feeds
 
 # Fetch Bloomberg homepage headlines
-opencli bloomberg main --limit 5
+opencliz bloomberg main --limit 5
 
 # Fetch a section feed as JSON
-opencli bloomberg tech --limit 3 -f json
+opencliz bloomberg tech --limit 3 -f json
 
 # Read a standard article page
-opencli bloomberg news https://www.bloomberg.com/news/articles/2026-03-19/example -f json
+opencliz bloomberg news https://www.bloomberg.com/news/articles/2026-03-19/example -f json
 
 # Relative article paths also work
-opencli bloomberg news /news/articles/2026-03-19/example
+opencliz bloomberg news /news/articles/2026-03-19/example
 ```
 
 ## Prerequisites

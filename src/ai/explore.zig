@@ -641,7 +641,7 @@ pub const Generator = struct {
         try file.writeAll(yaml_config);
 
         std.log.info("Adapter saved to: {s}", .{output_path});
-        std.log.info("Registry loads user YAML at startup; run `opencli list` or any command in a new process to pick up new adapters.", .{});
+        std.log.info("Registry loads user YAML at startup; run `opencliz list` or any command in a new process to pick up new adapters.", .{});
     }
 
     /// 生成选项（`output_dir` 空则使用本机 `~/.opencli/clis`）

@@ -8,7 +8,7 @@
 #   OPENCLI_CACHE=0 ./scripts/compare_command_json.sh --diff-ts /tmp/ts.json hackernews/top --limit 1
 #
 # 环境变量:
-#   ZIG_BIN  默认: <repo>/zig-out/bin/opencli
+#   ZIG_BIN  默认: <repo>/zig-out/bin/opencliz
 #   OPENCLI_CACHE=0  建议与 TS 并排 diff 时关闭适配器 fetchJson 的 JSON 内存缓存（批次 56；TTL 见 OPENCLI_CACHE_*）
 #
 # 与上游 TS 版并排对比（基线：github.com/jackwener/opencli；需 jq 排序键）:
@@ -22,7 +22,7 @@
 #
 set -euo pipefail
 ROOT="$(cd "$(dirname "${0}")/.." && pwd)"
-ZIG_BIN="${ZIG_BIN:-$ROOT/zig-out/bin/opencli}"
+ZIG_BIN="${ZIG_BIN:-$ROOT/zig-out/bin/opencliz}"
 
 VALIDATE=0
 OUTPUT=""

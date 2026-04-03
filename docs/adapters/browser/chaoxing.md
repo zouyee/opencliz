@@ -1,4 +1,4 @@
-# 超星学习通 (Chaoxing)
+# Chaoxing (learning platform)
 
 **Mode**: 🔐 Browser · **Domain**: `mooc2-ans.chaoxing.com`
 
@@ -6,23 +6,23 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli chaoxing assignments` | 学习通作业列表 |
-| `opencli chaoxing exams` | 学习通考试列表 |
+| `opencliz chaoxing assignments` | Assignment list |
+| `opencliz chaoxing exams` | Exam list |
 
 ## Usage Examples
 
 ```bash
 # List all assignments
-opencli chaoxing assignments --limit 20
+opencliz chaoxing assignments --limit 20
 
 # Filter exams by course name
-opencli chaoxing exams --course "高等数学"
+opencliz chaoxing exams --course "Calculus"
 
 # Filter exams by status
-opencli chaoxing exams --status ongoing
+opencliz chaoxing exams --status ongoing
 
 # JSON output
-opencli chaoxing assignments -f json
+opencliz chaoxing assignments -f json
 ```
 
 ### Options
@@ -30,8 +30,8 @@ opencli chaoxing assignments -f json
 | Option | Description |
 |--------|-------------|
 | `--course` | Filter by course name (fuzzy match) |
-| `--status` | Filter by status: `all`, `upcoming`, `ongoing`, `finished` |
-| `--limit` | Max number of results (default: 20) |
+| `--status` | Filter: `all`, `upcoming`, `ongoing`, `finished` |
+| `--limit` | Max results (default: 20) |
 
 ## Prerequisites
 

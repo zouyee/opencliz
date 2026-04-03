@@ -1,4 +1,4 @@
-# Xiaoyuzhou (小宇宙)
+# Xiaoyuzhou
 
 **Mode**: 🌐 Public · **Domain**: `xiaoyuzhou.fm`
 
@@ -6,21 +6,21 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli xiaoyuzhou podcast` | |
-| `opencli xiaoyuzhou podcast-episodes` | |
-| `opencli xiaoyuzhou episode` | |
+| `opencliz xiaoyuzhou podcast` | |
+| `opencliz xiaoyuzhou podcast-episodes` | |
+| `opencliz xiaoyuzhou episode` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli xiaoyuzhou podcast --limit 5
+opencliz xiaoyuzhou podcast --limit 5
 
 # JSON output
-opencli xiaoyuzhou podcast -f json
+opencliz xiaoyuzhou podcast -f json
 
 # Verbose mode
-opencli xiaoyuzhou podcast -v
+opencliz xiaoyuzhou podcast -v
 ```
 
 ## Prerequisites

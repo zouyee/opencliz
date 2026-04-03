@@ -1,4 +1,4 @@
-# 新浪财经 (Sina Finance)
+# Sina Finance
 
 **Mode**: 🌐 Public · **Domain**: `finance.sina.com.cn`
 
@@ -6,21 +6,21 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli sinafinance news` | 新浪财经 7×24 小时实时快讯 |
+| `opencliz sinafinance news` | Sina Finance 7×24 flash headlines |
 
 ## Usage Examples
 
 ```bash
 # Latest financial news
-opencli sinafinance news --limit 20
+opencliz sinafinance news --limit 20
 
 # Filter by type
-opencli sinafinance news --type 1   # A股
-opencli sinafinance news --type 2   # 宏观
-opencli sinafinance news --type 6   # 国际
+opencliz sinafinance news --type 1   # A-shares
+opencliz sinafinance news --type 2   # Macro
+opencliz sinafinance news --type 6   # International
 
 # JSON output
-opencli sinafinance news -f json
+opencliz sinafinance news -f json
 ```
 
 ### Options
@@ -28,8 +28,8 @@ opencli sinafinance news -f json
 | Option | Description |
 |--------|-------------|
 | `--limit` | Max results, up to 50 (default: 20) |
-| `--type` | News type: `0`=全部, `1`=A股, `2`=宏观, `3`=公司, `4`=数据, `5`=市场, `6`=国际, `7`=观点, `8`=央行, `9`=其它 |
+| `--type` | News type: `0`=all, `1`=A-shares, `2`=macro, `3`=company, `4`=data, `5`=market, `6`=international, `7`=opinion, `8`=central bank, `9`=other |
 
 ## Prerequisites
 
-- No browser required — uses public API
+- No browser — public API

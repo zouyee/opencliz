@@ -486,7 +486,7 @@ pub const NetworkInterceptor = struct {
         try writer.print("{{\n", .{});
         try writer.print("  \"log\": {{\n", .{});
         try writer.print("    \"version\": \"1.2\",\n", .{});
-        try writer.print("    \"creator\": {{\"name\": \"OpenCLI\", \"version\": \"2.2.0\"}},\n", .{});
+        try writer.print("    \"creator\": {{\"name\": \"opencliz\", \"version\": \"v0.0.1\"}},\n", .{});
         try writer.print("    \"entries\": [\n", .{});
         
         var first = true;

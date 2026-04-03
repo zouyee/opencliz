@@ -6,25 +6,25 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli linkedin search` | |
-| `opencli linkedin timeline` | Read posts from your LinkedIn home feed |
+| `opencliz linkedin search` | |
+| `opencliz linkedin timeline` | Read posts from your LinkedIn home feed |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli linkedin search --limit 5
+opencliz linkedin search --limit 5
 
 # Read your home timeline
-opencli linkedin timeline --limit 5
+opencliz linkedin timeline --limit 5
 
 # JSON output
-opencli linkedin search -f json
+opencliz linkedin search -f json
 
-opencli linkedin timeline -f json
+opencliz linkedin timeline -f json
 
 # Verbose mode
-opencli linkedin search -v
+opencliz linkedin search -v
 ```
 
 ## Prerequisites

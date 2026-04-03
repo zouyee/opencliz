@@ -17,7 +17,7 @@ pub fn build(b: *std.Build) !void {
     root_mod.addImport("quickjs", qjs_dep.module("quickjs"));
 
     const exe = b.addExecutable(.{
-        .name = "opencli",
+        .name = "opencliz",
         .root_module = root_mod,
     });
     exe.linkLibrary(qjs_dep.artifact("quickjs-ng"));

@@ -6,28 +6,28 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli facebook profile` | Get user/page profile info |
-| `opencli facebook notifications` | Get recent notifications |
-| `opencli facebook feed` | Get news feed posts |
-| `opencli facebook search` | Search people, pages, posts |
+| `opencliz facebook profile` | Get user/page profile info |
+| `opencliz facebook notifications` | Get recent notifications |
+| `opencliz facebook feed` | Get news feed posts |
+| `opencliz facebook search` | Search people, pages, posts |
 
 ## Usage Examples
 
 ```bash
 # View a profile
-opencli facebook profile zuck
+opencliz facebook profile zuck
 
 # Get notifications
-opencli facebook notifications --limit 10
+opencliz facebook notifications --limit 10
 
 # News feed
-opencli facebook feed --limit 5
+opencliz facebook feed --limit 5
 
 # Search
-opencli facebook search "OpenAI" --limit 5
+opencliz facebook search "OpenAI" --limit 5
 
 # JSON output
-opencli facebook profile zuck -f json
+opencliz facebook profile zuck -f json
 ```
 
 ## Prerequisites

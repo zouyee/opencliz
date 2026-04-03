@@ -1,4 +1,4 @@
-# 即刻 (Jike)
+# Jike
 
 **Mode**: 🔐 Browser · **Domain**: `web.okjike.com`
 
@@ -6,37 +6,37 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli jike feed` | 即刻首页动态流 |
-| `opencli jike search` | 搜索即刻帖子 |
-| `opencli jike post` | 帖子详情及评论 |
-| `opencli jike topic` | 话题详情 |
-| `opencli jike user` | 用户资料 |
-| `opencli jike create` | 发布即刻动态 |
-| `opencli jike comment` | 评论即刻帖子 |
-| `opencli jike like` | 点赞即刻帖子 |
-| `opencli jike repost` | 转发即刻帖子 |
-| `opencli jike notifications` | 即刻通知 |
+| `opencliz jike feed` | Home feed |
+| `opencliz jike search` | Search posts |
+| `opencliz jike post` | Post detail and comments |
+| `opencliz jike topic` | Topic detail |
+| `opencliz jike user` | User profile |
+| `opencliz jike create` | Publish a post |
+| `opencliz jike comment` | Comment on a post |
+| `opencliz jike like` | Like a post |
+| `opencliz jike repost` | Repost |
+| `opencliz jike notifications` | Notifications |
 
 ## Usage Examples
 
 ```bash
 # View feed
-opencli jike feed --limit 10
+opencliz jike feed --limit 10
 
 # Search posts
-opencli jike search "AI" --limit 20
+opencliz jike search "AI" --limit 20
 
 # View post details and comments
-opencli jike post <post-id>
+opencliz jike post <post-id>
 
 # Create a new post
-opencli jike create --content "Hello Jike!"
+opencliz jike create --content "Hello Jike!"
 
 # Like a post
-opencli jike like <post-id>
+opencliz jike like <post-id>
 
 # JSON output
-opencli jike feed -f json
+opencliz jike feed -f json
 ```
 
 ## Prerequisites

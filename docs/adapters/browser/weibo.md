@@ -1,4 +1,4 @@
-# Weibo (微博)
+# Weibo
 
 **Mode**: 🔐 Browser · **Domain**: `weibo.com`
 
@@ -6,23 +6,23 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli weibo hot` | |
-| `opencli weibo search` | Search Weibo posts by keyword |
+| `opencliz weibo hot` | |
+| `opencliz weibo search` | Search Weibo posts by keyword |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli weibo hot --limit 5
+opencliz weibo hot --limit 5
 
 # JSON output
-opencli weibo hot -f json
+opencliz weibo hot -f json
 
 # Search
-opencli weibo search "OpenAI" --limit 5
+opencliz weibo search "OpenAI" --limit 5
 
 # Verbose mode
-opencli weibo hot -v
+opencliz weibo hot -v
 ```
 
 ## Prerequisites

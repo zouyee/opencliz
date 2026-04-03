@@ -6,21 +6,21 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli youtube search` | |
-| `opencli youtube video` | |
-| `opencli youtube transcript` | |
+| `opencliz youtube search` | |
+| `opencliz youtube video` | |
+| `opencliz youtube transcript` | |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli youtube search --limit 5
+opencliz youtube search --limit 5
 
 # JSON output
-opencli youtube search -f json
+opencliz youtube search -f json
 
 # Verbose mode
-opencli youtube search -v
+opencliz youtube search -v
 ```
 
 ## Prerequisites

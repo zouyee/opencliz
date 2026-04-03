@@ -6,38 +6,38 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli instagram profile` | Get user profile info |
-| `opencli instagram search` | Search users |
-| `opencli instagram user` | Get recent posts from a user |
-| `opencli instagram explore` | Discover trending posts |
-| `opencli instagram followers` | List user's followers |
-| `opencli instagram following` | List user's following |
-| `opencli instagram saved` | Get your saved posts |
+| `opencliz instagram profile` | Get user profile info |
+| `opencliz instagram search` | Search users |
+| `opencliz instagram user` | Get recent posts from a user |
+| `opencliz instagram explore` | Discover trending posts |
+| `opencliz instagram followers` | List user's followers |
+| `opencliz instagram following` | List user's following |
+| `opencliz instagram saved` | Get your saved posts |
 
 ## Usage Examples
 
 ```bash
 # View a user's profile
-opencli instagram profile nasa
+opencliz instagram profile nasa
 
 # Search users
-opencli instagram search nasa --limit 5
+opencliz instagram search nasa --limit 5
 
 # View a user's recent posts
-opencli instagram user nasa --limit 10
+opencliz instagram user nasa --limit 10
 
 # Discover trending posts
-opencli instagram explore --limit 20
+opencliz instagram explore --limit 20
 
 # List followers/following
-opencli instagram followers nasa --limit 20
-opencli instagram following nasa --limit 20
+opencliz instagram followers nasa --limit 20
+opencliz instagram following nasa --limit 20
 
 # Get your saved posts
-opencli instagram saved --limit 10
+opencliz instagram saved --limit 10
 
 # JSON output
-opencli instagram profile nasa -f json
+opencliz instagram profile nasa -f json
 ```
 
 ## Prerequisites

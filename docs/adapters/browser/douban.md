@@ -1,4 +1,4 @@
-# 豆瓣 (Douban)
+# Douban
 
 **Mode**: 🔐 Browser (Cookie) · **Domain**: `douban.com`
 
@@ -6,40 +6,40 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli douban search` | 搜索豆瓣电影、图书或音乐 |
-| `opencli douban top250` | 豆瓣电影 Top 250 |
-| `opencli douban subject` | 条目详情 |
-| `opencli douban marks` | 我的标记 |
-| `opencli douban reviews` | 我的短评 |
-| `opencli douban movie-hot` | 豆瓣电影热门榜单 |
-| `opencli douban book-hot` | 豆瓣图书热门榜单 |
+| `opencliz douban search` | Search movies, books, or music |
+| `opencliz douban top250` | Douban Top 250 movies |
+| `opencliz douban subject` | Subject (item) detail |
+| `opencliz douban marks` | Your marks |
+| `opencliz douban reviews` | Your short reviews |
+| `opencliz douban movie-hot` | Hot movies chart |
+| `opencliz douban book-hot` | Hot books chart |
 
 ## Usage Examples
 
 ```bash
-# 搜索电影
-opencli douban search "流浪地球"
+# Search movies
+opencliz douban search "The Wandering Earth"
 
-# 搜索图书
-opencli douban search --type book "三体"
+# Search books
+opencliz douban search --type book "Three-Body"
 
-# 搜索音乐
-opencli douban search --type music "周杰伦"
+# Search music
+opencliz douban search --type music "Jay Chou"
 
-# 电影 Top 250
-opencli douban top250 --limit 10
+# Movie Top 250
+opencliz douban top250 --limit 10
 
-# 条目详情
-opencli douban subject 1292052
+# Subject detail
+opencliz douban subject 1292052
 
-# 电影热门
-opencli douban movie-hot --limit 10
+# Hot movies
+opencliz douban movie-hot --limit 10
 
-# 图书热门
-opencli douban book-hot --limit 10
+# Hot books
+opencliz douban book-hot --limit 10
 
 # JSON output
-opencli douban top250 -f json
+opencliz douban top250 -f json
 ```
 
 ## Prerequisites

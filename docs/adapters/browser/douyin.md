@@ -1,4 +1,4 @@
-# Douyin (抖音创作者中心)
+# Douyin (Creator Center)
 
 **Mode**: 🔐 Browser · **Domain**: `creator.douyin.com`
 
@@ -6,60 +6,60 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli douyin profile` | 获取账号信息 |
-| `opencli douyin videos` | 获取作品列表 |
-| `opencli douyin drafts` | 获取草稿列表 |
-| `opencli douyin draft` | 上传视频并保存为草稿 |
-| `opencli douyin publish` | 定时发布视频到抖音 |
-| `opencli douyin update` | 更新视频信息 |
-| `opencli douyin delete` | 删除作品 |
-| `opencli douyin stats` | 查询作品数据分析 |
-| `opencli douyin collections` | 获取合集列表 |
-| `opencli douyin activities` | 获取官方活动列表 |
-| `opencli douyin location` | 搜索发布可用的地理位置 |
-| `opencli douyin hashtag search` | 按关键词搜索话题 |
-| `opencli douyin hashtag suggest` | 基于封面 URI 推荐话题 |
-| `opencli douyin hashtag hot` | 获取热点词 |
+| `opencliz douyin profile` | Account info |
+| `opencliz douyin videos` | Published works list |
+| `opencliz douyin drafts` | Draft list |
+| `opencliz douyin draft` | Upload video and save as draft |
+| `opencliz douyin publish` | Schedule publish to Douyin |
+| `opencliz douyin update` | Update video metadata |
+| `opencliz douyin delete` | Delete a work |
+| `opencliz douyin stats` | Analytics for a work |
+| `opencliz douyin collections` | Collections list |
+| `opencliz douyin activities` | Official activities list |
+| `opencliz douyin location` | Search locations usable for publishing |
+| `opencliz douyin hashtag search` | Search hashtags by keyword |
+| `opencliz douyin hashtag suggest` | Suggest hashtags from a cover URI |
+| `opencliz douyin hashtag hot` | Trending hashtag terms |
 
 ## Usage Examples
 
 ```bash
-# 账号与作品
-opencli douyin profile
-opencli douyin videos --limit 10
-opencli douyin videos --status scheduled
-opencli douyin drafts
+# Account and works
+opencliz douyin profile
+opencliz douyin videos --limit 10
+opencliz douyin videos --status scheduled
+opencliz douyin drafts
 
-# 发布前辅助信息
-opencli douyin collections
-opencli douyin activities
-opencli douyin location "东京塔"
-opencli douyin hashtag search "春游"
-opencli douyin hashtag hot --limit 10
+# Before publishing
+opencliz douyin collections
+opencliz douyin activities
+opencliz douyin location "Tokyo Tower"
+opencliz douyin hashtag search "spring trip"
+opencliz douyin hashtag hot --limit 10
 
-# 保存草稿
-opencli douyin draft ./video.mp4 \
-  --title "春游 vlog" \
-  --caption "#春游 先存草稿"
+# Save draft
+opencliz douyin draft ./video.mp4 \
+  --title "Spring trip vlog" \
+  --caption "#springtrip saving as draft"
 
-# 定时发布
-opencli douyin publish ./video.mp4 \
-  --title "春游 vlog" \
-  --caption "#春游 今天去看樱花" \
+# Scheduled publish
+opencliz douyin publish ./video.mp4 \
+  --title "Spring trip vlog" \
+  --caption "#springtrip cherry blossoms today" \
   --schedule "2026-04-08T12:00:00+09:00"
 
-# 也支持 Unix 秒字符串
-opencli douyin publish ./video.mp4 \
-  --title "春游 vlog" \
+# Unix epoch seconds also supported
+opencliz douyin publish ./video.mp4 \
+  --title "Spring trip vlog" \
   --schedule 1775617200
 
-# 更新与删除
-opencli douyin update 1234567890 --caption "更新后的文案"
-opencli douyin update 1234567890 --reschedule "2026-04-09T20:00:00+09:00"
-opencli douyin delete 1234567890
+# Update and delete
+opencliz douyin update 1234567890 --caption "Updated caption"
+opencliz douyin update 1234567890 --reschedule "2026-04-09T20:00:00+09:00"
+opencliz douyin delete 1234567890
 
-# JSON 输出
-opencli douyin profile -f json
+# JSON output
+opencliz douyin profile -f json
 ```
 
 ## Prerequisites

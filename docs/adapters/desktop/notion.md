@@ -19,11 +19,11 @@ export OPENCLI_CDP_ENDPOINT="http://127.0.0.1:9230"
 
 | Command | Description |
 |---------|-------------|
-| `opencli notion status` | Check CDP connection |
-| `opencli notion search "query"` | Quick Find search (Cmd+P) |
-| `opencli notion read` | Read the current page content |
-| `opencli notion new "title"` | Create a new page (Cmd+N) |
-| `opencli notion write "text"` | Append text to the current page |
-| `opencli notion sidebar` | List pages from the sidebar |
-| `opencli notion favorites` | List pages from the Favorites section |
-| `opencli notion export` | Export page as Markdown |
+| `opencliz notion status` | Check CDP connection |
+| `opencliz notion search "query"` | Quick Find search (Cmd+P) |
+| `opencliz notion read` | Read the current page content |
+| `opencliz notion new "title"` | Create a new page (Cmd+N) |
+| `opencliz notion write "text"` | Append text to the current page |
+| `opencliz notion sidebar` | List pages from the sidebar |
+| `opencliz notion favorites` | List pages from the Favorites section |
+| `opencliz notion export` | Export page as Markdown |

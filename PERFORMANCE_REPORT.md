@@ -1,300 +1,255 @@
-# OpenCLI TypeScript → Zig 迁移性价比分析报告
+# Performance report: TypeScript upstream vs Zig port (`opencliz`)
 
-**日期**: 2026-03-31
-**分析维度**: 构建效率 | 二进制体积 | 运行效率 | 资源占用
+**Date:** 2026-04-01  
+**Scope:** Qualitative and order-of-magnitude comparison between a typical **Node.js / TypeScript** distribution of [jackwener/opencli](https://github.com/jackwener/opencli) and this repository’s **Zig** binary **`opencliz`**. Numbers below mix **published benchmarks**, **one-off local measurements**, and **rounded estimates**—use them for planning, not as SLAs.
 
----
-
-## 一、核心指标对比
-
-| 指标 | TypeScript 版本 | Zig 版本 | 提升幅度 |
-|------|----------------|----------|---------|
-| **二进制体积** | ~50MB (Node.js runtime) | **3.5MB** | **14x 更小** |
-| **冷启动时间** | ~500ms | **3-4ms** | **125x 更快** |
-| **内存占用 (idle)** | ~150MB | **1.6MB** | **94x 更低** |
-| **内存占用 (list)** | N/A | **2.7MB** | - |
-| **内存占用 (API调用)** | N/A | **7.4MB** | - |
-| **Debug构建时间** | ~10-30s (npm install + tsc) | **0.1s** | **100x+** |
-| **Release构建时间** | ~30-60s | **9.7s** | **3-6x** |
-| **依赖数量** | 100+ npm packages | **0** (仅 zig-clap) | **无依赖** |
+**Dimensions:** build time · artifact size · cold start · memory · dependency surface
 
 ---
 
-## 二、构建效率分析
+## 1. Headline metrics
 
-### 2.1 Debug 构建 (zig build)
+| Metric | Typical TS / Node stack | Zig `opencliz` (this repo) | Order of magnitude |
+|--------|-------------------------|----------------------------|--------------------|
+| **Artifact size** | ~50 MB+ (app + Node runtime footprint) | **~5–6 MB** single binary (ReleaseFast; platform-dependent) | **~9–10× smaller** (vs ~50 MB baseline) |
+| **Cold start** | ~200–500 ms (Node init + load) | **~3–5 ms** (process start + trivial CLI path) | **~100× faster** |
+| **RSS (idle)** | ~100–200 MB typical for Node CLI | **~1–3 MB** (`--version` / tiny paths) | **~50–100× lower** |
+| **RSS (`list`)** | Often tens of MB | **~2–4 MB** (measured in prior runs; depends on registry size) | Much lower |
+| **RSS (HTTP command)** | Higher (buffers, TLS, JSON) | **~5–10 MB** typical for one-shot API call | Still far below Node baseline |
+| **Debug iteration** | `npm install` + `tsc` often **15–45 s** first/full cycle | **`zig build`** often **sub-second** after cache warm | **Large win** |
+| **Release build** | **~30–70 s** typical CI path | **`zig build -Doptimize=ReleaseFast`** **~10–30 s** (machine-dependent) | **Several× faster** |
+| **Runtime deps** | **100+** npm packages + Node | **No `node_modules`**; Zig **stdlib** + **`build.zig.zon`** deps (e.g. **QuickJS-ng**), static link | **No Node/npm in production** |
 
+---
+
+## 2. Build efficiency
+
+### 2.1 Developer loop (debug)
+
+Typical TypeScript CLI project:
+
+```text
+npm install     → 10–30 s (cold or lockfile change)
+tsc --build     → 5–15 s
+Total           → often 15–45 s per full cycle
 ```
-TypeScript:
-  npm install     → 10-30 秒 (首次)
-  tsc --build     → 5-15 秒
-  总计           → 15-45 秒
+
+This Zig port (after dependencies are fetched):
+
+```text
+zig build       → commonly <1 s (incremental); cold can be higher
+```
+
+**Takeaway:** Edit–compile–test loops are much shorter in Zig for this codebase size.
+
+### 2.2 Release (optimized)
+
+```text
+TypeScript (typical):
+  install + optimized bundle → often 30–70 s in CI
 
 Zig:
-  zig build       → 0.1 秒
-  总计           → 0.1 秒
+  zig build -Doptimize=ReleaseFast → often ~10–30 s (CPU-dependent)
 ```
 
-**提升**: ~150-450x
+### 2.3 Deliverable shape
 
-### 2.2 Release 构建 (生产优化)
-
-```
-TypeScript:
-  npm install     → 10-30 秒
-  tsc --build --optimize → 20-40 秒
-  总计           → 30-70 秒
-
-Zig:
-  zig build -Doptimize=ReleaseFast → 9.7 秒
-  总计           → 9.7 秒
-```
-
-**提升**: ~3-7x
-
-### 2.3 构建产物
-
-| 产物 | TypeScript | Zig |
-|------|------------|-----|
-| 最终产物 | 50MB+ (二进制 + Node.js) | **3.5MB 单文件** |
-| 需要运行时 | Node.js 运行时 (100MB+) | **无需运行时** |
-| 部署方式 | 需安装 Node.js | `scp` 直接分发 |
+| Output | TypeScript / Node | Zig |
+|--------|-------------------|-----|
+| What you ship | JS + `node_modules` or bundled assets + **Node runtime** | **One native executable** |
+| Host requirement | Compatible Node version | None beyond OS + (optional) Chrome for CDP paths |
+| Distribution | `npm i -g` or container with Node base | Copy binary; small container base (e.g. Alpine) possible |
 
 ---
 
-## 三、运行效率分析
+## 3. Runtime behavior
 
-### 3.1 命令执行时间
+### 3.1 Example latencies (includes network where noted)
 
-| 命令 | 时间 | 说明 |
-|------|------|------|
-| `--version` | **<1ms** | 进程启动 + 输出 |
-| `list` | **<1ms** | 列出 354 命令 |
-| `bilibili/hot --limit 3` | **162ms** | 含 API 网络请求 |
-| `hackernews/top --limit 3` | **2900ms** | HN API 较慢 |
+| Command | Approx. time | Notes |
+|---------|--------------|--------|
+| `--version` | **<1 ms** | No I/O beyond stdout |
+| `list` | **~1 ms** | Depends on command count and disk; still tiny |
+| `bilibili/hot --limit 3` | **~100–200 ms** | Dominated by **HTTP**; figures drift with CDN and region |
+| `hackernews/top --limit 3` | **~1–3 s** | Upstream Firebase/API latency dominates |
 
-### 3.2 与 TypeScript 对比 (估算)
+### 3.2 TS vs Zig (illustrative, non-network)
 
-| 场景 | TypeScript | Zig | 提升 |
-|------|------------|-----|------|
-| 冷启动 (无缓存) | 500ms | 3ms | 167x |
-| 热启动 (复用进程) | 50ms | 3ms | 17x |
-| API 调用 (不含网络) | 50ms | 5ms | 10x |
-| `list` 命令 | 100ms | 1ms | 100x |
+| Scenario | TS / Node (order of magnitude) | Zig | Comment |
+|----------|--------------------------------|-----|---------|
+| Cold process start | 200–500 ms | 3–5 ms | Biggest differentiator for shell automation |
+| Warm / reused process | 50 ms+ | N/A for one-shot CLI | Node can amortize if long-lived |
+| Pure CPU path (no HTTP) | tens of ms | single-digit ms | V8 vs native; workload-specific |
+| `list` | ~50–150 ms | **~1 ms** | Registry parse in Zig is lightweight |
 
----
-
-## 四、内存占用分析
-
-### 4.1 内存占用详情
-
-```
-空闲状态 (--version):
-  RSS: 1.6 MB
-
-list 命令:
-  RSS: 2.7 MB
-
-API 调用 (bilibili/hot):
-  RSS: 7.4 MB (含网络缓冲)
-```
-
-### 4.2 与 TypeScript 对比
-
-| 场景 | TypeScript | Zig | 节省 |
-|------|------------|-----|------|
-| 空闲状态 | 150MB | 1.6MB | **148MB (98%)** |
-| 峰值使用 | 300MB+ | 10MB | **290MB (97%)** |
+**Important:** For real adapters, **wall-clock is usually network-bound**. Zig wins most clearly on **startup**, **memory**, and **deployment surface**.
 
 ---
 
-## 五、依赖管理对比
+## 4. Memory (RSS)
 
-### 5.1 TypeScript 版本依赖
+### 4.1 Example snapshots (macOS `time`; values vary by OS and allocator)
 
-```json
-// package.json (部分)
-{
-  "dependencies": {
-    "playwright": "^1.40.0",      // 浏览器自动化 (~100MB)
-    "node-fetch": "^3.3.0",       // HTTP 客户端
-    "cheerio": "^1.0.0",          // HTML 解析
-    "ioredis": "^5.3.0",          // Redis 缓存
-    "ws": "^8.14.0",              // WebSocket
-    "yaml": "^2.3.0",             // YAML 解析
-    // ... 100+ more packages
-  }
-}
+```text
+opencliz --version     → ~1.6 MB RSS  (example)
+opencliz list          → ~2.7 MB RSS  (example)
+opencliz bilibili/hot  → ~7.4 MB RSS  (example; includes HTTP buffers)
 ```
 
-**总依赖大小**: ~500MB+ (node_modules)
+### 4.2 vs Node (typical)
 
-### 5.2 Zig 版本依赖
-
-```zig
-// build.zig
-const std = @import("std");
-// 唯一外部依赖: zig-clap (内置)
-```
-
-**总依赖大小**: 0 (Zig 标准库 + 内置 zig-clap)
+| Scenario | Node (typical) | Zig (this port) |
+|----------|----------------|-----------------|
+| Idle / tiny CLI | ~100–200 MB RSS | **~1–3 MB** |
+| Peak for one command | Often **hundreds of MB** with full dependency tree | **Single-digit to low tens of MB** unless large allocations |
 
 ---
 
-## 六、性价比综合评分
+## 5. Dependency surface
 
-### 6.1 评分表 (1-10 分)
+### 5.1 Upstream-style TypeScript stack (illustrative)
 
-| 维度 | TypeScript | Zig | 说明 |
-|------|-----------|-----|------|
-| 构建速度 | 3 | **10** | Zig 编译速度优势巨大 |
-| 二进制体积 | 2 | **10** | 3.5MB vs 50MB+ |
-| 启动速度 | 3 | **10** | 3ms vs 500ms |
-| 内存效率 | 2 | **10** | 1.6MB vs 150MB |
-| 依赖管理 | 4 | **10** | 零依赖 vs 100+ |
-| 部署便捷性 | 5 | **10** | 单文件 vs 需要 Node |
-| **综合评分** | **3.2** | **10** | |
+Large CLIs often pull:
 
-### 6.2 成本节约估算
+- Playwright or Puppeteer (browser automation) — **very large** on disk  
+- HTTP, HTML, YAML, WebSocket, Redis clients, etc. — **many** `node_modules` entries  
 
-| 场景 | TypeScript 成本 | Zig 成本 | 节约 |
-|------|----------------|----------|------|
-| 开发者机器 (构建) | 30s × 50次/天 = 25min/天 | 0.1s × 50次 = 5s/天 | **24min/天** |
-| CI/CD 构建 | 60s × 100次/天 = 100min/天 | 10s × 100次 = 16min/天 | **84min/天** |
-| 内存使用 (服务器) | 150MB × 100实例 = 15GB | 5MB × 100实例 = 0.5GB | **14.5GB** |
-| 冷启动延迟 | 500ms × 1000次/天 = 500s | 4ms × 1000次 = 4s | **496s/天** |
+**Disk:** `node_modules` commonly **hundreds of MB** for rich apps.
+
+### 5.2 This Zig port
+
+- **No** npm / Node at runtime.  
+- **Zig standard library** for most logic.  
+- **`build.zig.zon`**: e.g. **QuickJS-ng** for plugin JS; **libcurl** (or system curl) for HTTP—**linked into the binary**, not shipped as separate package manager tree.  
+- Operational complexity shifts from **semver of 100 packages** to **Zig version + C toolchain** for native deps.
 
 ---
 
-## 七、具体场景耗时对比
+## 6. Scorecard (subjective 1–10)
 
-### 7.1 开发迭代场景
+| Dimension | TS / Node | Zig `opencliz` | Notes |
+|-----------|-----------|----------------|--------|
+| Incremental build speed | 3–5 | **9–10** | Zig excels for this repo size |
+| Artifact size | 3–4 | **9** | Single-digit MB vs runtime + app |
+| Cold start | 3–4 | **10** | Native process vs Node bootstrap |
+| Memory efficiency | 2–4 | **9–10** | Orders of magnitude for idle/small cmds |
+| Dependency hygiene (runtime) | 4–5 | **9** | No transitive npm at run time |
+| Ecosystem (libraries, SO answers) | **9** | 5–6 | Node wins raw ecosystem breadth |
 
-```
-场景: 修改代码后运行测试
+**Net:** Strong fit for a **CLI/daemon** where **footprint and startup** matter; TS remains strong for **rapid app iteration** and **browser-automation parity** where you keep Node/Playwright anyway.
 
-TypeScript:
-  1. 修改代码
-  2. Ctrl+S 保存
-  3. 等待 tsc 编译: 5-15 秒
-  4. 运行测试: 10-30 秒
-  总计: 15-45 秒
+---
 
-Zig:
-  1. 修改代码
-  2. Ctrl+S 保存
-  3. zig build: 0.1 秒
-  4. zig test: 2-5 秒
-  总计: 2-5 秒
+## 7. Scenario narratives
 
-提升: 3-20x
-```
+### 7.1 Local dev: change → test
 
-### 7.2 容器化部署场景
+**TypeScript:** edit → `tsc` → test → often **15–45 s** per full cold cycle.  
+**Zig:** edit → `zig build` / `zig build test` → often **a few seconds** total.
 
-```
-场景: Docker 镜像构建
+### 7.2 Container image (illustrative)
 
-TypeScript:
-  FROM node:18
-  RUN npm install (30s)
-  COPY . .
-  CMD ["node", "dist/index.js"]
-  镜像大小: 900MB+
+**Node image:** base **~900 MB+** with full toolchain and deps is common.  
+**Zig binary in minimal base:**
 
-Zig:
-  FROM alpine:latest
-  COPY opencli /usr/local/bin/
-  CMD ["opencli"]
-  镜像大小: 10MB
-
-体积缩小: 90x
+```dockerfile
+FROM alpine:latest
+COPY zig-out/bin/opencliz /usr/local/bin/opencliz
+ENTRYPOINT ["opencliz"]
 ```
 
-### 7.3 日常使用场景
+Image size is dominated by **Alpine + libc + binary**—often **tens of MB**, not hundreds.
 
-```
-场景: 用户执行 opencli bilibili/hot
+### 7.3 User runs one command
 
-TypeScript:
-  启动 Node.js: 200-500ms
-  加载模块: 100-200ms
-  执行逻辑: 50-100ms
-  网络请求: 100-500ms
-  总计: 450-1300ms
+**Node:** pay **startup + module load** every invocation unless wrapped.  
+**Zig:** **sub-millisecond** process start; remaining time is **your logic + network**.
 
-Zig:
-  进程启动: 3-5ms
-  加载配置: 1-2ms
-  执行逻辑: 10-50ms
-  网络请求: 100-500ms
-  总计: 114-557ms
+---
 
-提升: 4-10x (不含网络时间)
+## 8. Conclusions
+
+### 8.1 What you gain with the Zig port
+
+| Area | Benefit |
+|------|---------|
+| **Dev loop** | Much faster compile/test cycles vs full Node+tsc pipeline |
+| **Operations** | Tiny binary, low RSS, no Node on servers for the CLI |
+| **Supply chain** | No runtime npm tree; audit **Zig + native deps** instead |
+| **Edge / CI** | Faster cold starts for wrappers and automation |
+
+### 8.2 Trade-offs (honest)
+
+- **Playwright-level browser automation** is **not** replicated 1:1; CDP-based paths differ (see `docs/CDP_SCENARIO_MATRIX.md`).  
+- **Ecosystem**: fewer off-the-shelf Zig packages than npm for odd integrations.  
+- **Migration cost:** engineering time to reach feature parity (tracked separately from this performance note).
+
+### 8.3 Illustrative ROI model (not financial advice)
+
+Rough **thought experiment** only—substitute your own salaries and CI minutes:
+
+```text
+Assume:
+  - 10 developers × 20 min/day saved on build loops → ~200 min/day
+  - CI: 100 builds/day × 1 min saved each → 100 min/day
+  - Memory: fewer/smaller instances where the CLI runs as a sidecar
+
+Monetize with your internal $/minute and $/GB-month; treat as order-of-magnitude only.
 ```
 
 ---
 
-## 八、结论
+## Appendix A: How to reproduce (local)
 
-### 8.1 迁移收益总结
+**Binary size:**
 
-| 收益维度 | 具体收益 |
-|---------|----------|
-| **开发效率** | 构建速度提升 100-450x |
-| **运行效率** | 启动速度提升 125x，内存降低 94x |
-| **部署效率** | 二进制体积缩小 14x，零依赖 |
-| **运维成本** | 内存节约 98%，冷启动资源消耗降低 97% |
-
-### 8.2 投资回报率
-
-```
-迁移成本:
-  - 开发时间: ~3 个月 (已完成)
-  - 测试时间: ~1 个月 (已完成)
-
-年化收益:
-  - 构建时间节约: 300 min/day × 10 developers × 250 days × $0.05/min = $3,750/年
-  - CI/CD 节约: 84 min/day × 100 pipelines × $0.02/min = $4,200/年
-  - 服务器内存节约: 14.5GB × $0.01/GB/hour × 24h × 365 days = $1,270/年
-  - 用户体验提升: (难以量化) 显著正向影响
-
-总计年化收益: ~$9,220+
+```bash
+zig build -Doptimize=ReleaseFast
+ls -lh zig-out/bin/opencliz
+# Example (macOS arm64, 2026-04): ~5.5 MB
 ```
 
-### 8.3 关键成功因素
+**Build time:**
 
-1. **Zig 编译速度**: 0.1s debug 构建 vs 30s+ TypeScript
-2. **内存效率**: 1.6MB idle vs 150MB TypeScript
-3. **零依赖**: 部署无任何第三方库依赖
-4. **单二进制**: 3.5MB 可直接分发，无需运行时
+```bash
+/usr/bin/time -p zig build -Doptimize=ReleaseFast
+```
+
+**RSS (macOS):**
+
+```bash
+/usr/bin/time -l zig-out/bin/opencliz --version 2>&1 | grep maximum
+```
+
+**Command latency (includes network):**
+
+```bash
+/usr/bin/time -p zig-out/bin/opencliz bilibili/hot --limit 3 -f json
+```
+
+Repeat on **your** machine; CI and laptops differ.
 
 ---
 
-## 附录: 测量数据
+## Appendix B: Example captured numbers (point-in-time)
 
-### 构建时间
-```
-Debug Build:   0.095s  (real time)
-Release Build:  9.678s  (real time)
+These matched **one** local environment; **do not** treat as guarantees.
+
+```text
+Release build (example):     ~9.7 s real (varies by CPU)
+Binary (example):            ~5.5 MB  opencliz
+
+RSS (examples):
+  --version:                 ~1.6 MB
+  list:                      ~2.7 MB
+  bilibili/hot:              ~7.4 MB
+
+Latency (examples):
+  --version / list:          <1 ms
+  bilibili/hot:              ~162 ms (network-heavy)
+  hackernews/top:            ~2900 ms (upstream API latency)
 ```
 
-### 二进制大小
-```
--rwxr-xr-x  3.5MB  opencli
-```
+---
 
-### 运行时内存
-```
---version:     1.6 MB RSS
-list:          2.7 MB RSS  
-bilibili/hot:  7.4 MB RSS
-```
-
-### 执行时间
-```
---version:          <1ms
-list:               <1ms
-bilibili/hot:       162ms (含网络)
-hackernews/top:     2900ms (HN API 慢)
-```
+*Maintainer note: refresh Appendix B after major dependency or feature changes (QuickJS, curl, adapter count).*

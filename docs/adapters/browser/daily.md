@@ -1,11 +1,11 @@
 # daily
 
-**Mode**: 🌐 Public · **Domain**: （聚合/占位）
+**Mode**: 🌐 Public · **Domain**: _(aggregation placeholder)_
 
 ## Commands
 
-由内置适配器注册；具体子命令以 `opencli list` 为准。
+Registered by the built-in adapter; see `opencliz list` for specific subcommands.
 
 ```bash
-opencli list daily
+opencliz list daily
 ```

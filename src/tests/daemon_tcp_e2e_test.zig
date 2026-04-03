@@ -62,7 +62,7 @@ test "daemon tcp GET / root end-to-end" {
     const n = try stream.read(&buf);
     try std.testing.expect(n > 0);
     try std.testing.expect(std.mem.indexOf(u8, buf[0..n], "HTTP/1.1 200") != null);
-    try std.testing.expect(std.mem.indexOf(u8, buf[0..n], "OpenCLI Daemon") != null);
+    try std.testing.expect(std.mem.indexOf(u8, buf[0..n], "opencliz daemon") != null);
 }
 
 test "daemon tcp GET /health end-to-end" {

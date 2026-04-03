@@ -6,10 +6,10 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli google search <keyword>` | Search Google and extract results from the page |
-| `opencli google suggest <keyword>` | Get Google search suggestions |
-| `opencli google news [keyword]` | Get Google News headlines (top stories or search) |
-| `opencli google trends` | Get Google Trends daily trending searches |
+| `opencliz google search <keyword>` | Search Google and extract results from the page |
+| `opencliz google suggest <keyword>` | Get Google search suggestions |
+| `opencliz google news [keyword]` | Get Google News headlines (top stories or search) |
+| `opencliz google trends` | Get Google Trends daily trending searches |
 
 ## What works today
 
@@ -29,22 +29,22 @@
 
 ```bash
 # Search Google
-opencli google search "typescript tutorial" --limit 10
+opencliz google search "typescript tutorial" --limit 10
 
 # Get search suggestions
-opencli google suggest python
+opencliz google suggest python
 
 # Get top news headlines
-opencli google news --limit 5
+opencliz google news --limit 5
 
 # Search news for a topic
-opencli google news "artificial intelligence" --limit 10 --lang en --region US
+opencliz google news "artificial intelligence" --limit 10 --lang en --region US
 
 # Get trending searches in Japan
-opencli google trends --region JP --limit 10
+opencliz google trends --region JP --limit 10
 
 # Output as JSON
-opencli google search "machine learning" -f json
+opencliz google search "machine learning" -f json
 ```
 
 ## Prerequisites

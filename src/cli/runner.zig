@@ -3,6 +3,7 @@ const builtin = @import("builtin");
 const types = @import("../core/types.zig");
 const errors = @import("../core/errors.zig");
 const pipeline = @import("../pipeline/executor.zig");
+const VERSION = @import("../core/version.zig").VERSION;
 
 const OpenCliError = errors.OpenCliError;
 
@@ -568,7 +569,7 @@ pub const CliRunner = struct {
         const stdout = std.fs.File.stdout().deprecatedWriter();
         const style = @import("../output/format.zig").Style{ .enabled = true, .allocator = self.allocator };
 
-        const header = try style.bold("opencli — available commands");
+        const header = try style.bold("opencliz — available commands");
         defer self.allocator.free(header);
 
         try stdout.print("\n  {s}\n\n", .{header});
@@ -693,7 +694,7 @@ pub const BuiltinCommands = struct {
         if (count == 0) {
             try stdout.print("  No plugins installed.\n", .{});
             try stdout.print("\nTo install a plugin:\n", .{});
-            try stdout.print("  opencli plugin install --github user/repo\n", .{});
+            try stdout.print("  opencliz plugin install --github user/repo\n", .{});
         }
 
         try stdout.print("\n", .{});
@@ -784,7 +785,7 @@ pub const BuiltinCommands = struct {
         _ = config;
 
         const stdout = std.fs.File.stdout().deprecatedWriter();
-        try stdout.print("opencli version 2.0.0 (Zig rewrite)\n", .{});
+        try stdout.print("opencliz version {s} (Zig; opencliz ≠ npm opencli)\n", .{VERSION});
     }
 
     /// validate命令 - 验证适配器配置
@@ -976,7 +977,7 @@ pub const BuiltinCommands = struct {
         try output_file.writeAll(yaml_config);
 
         try stdout.print("✓ Adapter configuration synthesized: {s}\n", .{output_path});
-        try stdout.print("Restart or run a new `opencli` process so discovery reloads user YAML.\n\n", .{});
+        try stdout.print("Restart or run a new `opencliz` process so discovery reloads user YAML.\n\n", .{});
         try stdout.print("Generated configuration:\n{s}\n", .{yaml_config});
     }
 };

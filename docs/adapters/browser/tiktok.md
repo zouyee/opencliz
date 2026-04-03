@@ -6,60 +6,60 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli tiktok profile` | Get user profile info |
-| `opencli tiktok search` | Search videos |
-| `opencli tiktok explore` | Trending videos from explore page |
-| `opencli tiktok user` | Get recent videos from a user |
-| `opencli tiktok following` | List accounts you follow |
-| `opencli tiktok friends` | Friend suggestions |
-| `opencli tiktok live` | Browse live streams |
-| `opencli tiktok notifications` | Get notifications |
-| `opencli tiktok like` | Like a video |
-| `opencli tiktok unlike` | Unlike a video |
-| `opencli tiktok save` | Add to Favorites |
-| `opencli tiktok unsave` | Remove from Favorites |
-| `opencli tiktok follow` | Follow a user |
-| `opencli tiktok unfollow` | Unfollow a user |
-| `opencli tiktok comment` | Comment on a video |
+| `opencliz tiktok profile` | Get user profile info |
+| `opencliz tiktok search` | Search videos |
+| `opencliz tiktok explore` | Trending videos from explore page |
+| `opencliz tiktok user` | Get recent videos from a user |
+| `opencliz tiktok following` | List accounts you follow |
+| `opencliz tiktok friends` | Friend suggestions |
+| `opencliz tiktok live` | Browse live streams |
+| `opencliz tiktok notifications` | Get notifications |
+| `opencliz tiktok like` | Like a video |
+| `opencliz tiktok unlike` | Unlike a video |
+| `opencliz tiktok save` | Add to Favorites |
+| `opencliz tiktok unsave` | Remove from Favorites |
+| `opencliz tiktok follow` | Follow a user |
+| `opencliz tiktok unfollow` | Unfollow a user |
+| `opencliz tiktok comment` | Comment on a video |
 
 ## Usage Examples
 
 ```bash
 # View a user's profile
-opencli tiktok profile --username tiktok
+opencliz tiktok profile --username tiktok
 
 # Search videos
-opencli tiktok search "cooking" --limit 10
+opencliz tiktok search "cooking" --limit 10
 
 # Trending explore videos
-opencli tiktok explore --limit 20
+opencliz tiktok explore --limit 20
 
 # Browse live streams
-opencli tiktok live --limit 10
+opencliz tiktok live --limit 10
 
 # List who you follow
-opencli tiktok following
+opencliz tiktok following
 
 # Friend suggestions
-opencli tiktok friends --limit 10
+opencliz tiktok friends --limit 10
 
 # Like/unlike a video
-opencli tiktok like --url "https://www.tiktok.com/@user/video/123"
-opencli tiktok unlike --url "https://www.tiktok.com/@user/video/123"
+opencliz tiktok like --url "https://www.tiktok.com/@user/video/123"
+opencliz tiktok unlike --url "https://www.tiktok.com/@user/video/123"
 
 # Save/unsave (Favorites)
-opencli tiktok save --url "https://www.tiktok.com/@user/video/123"
-opencli tiktok unsave --url "https://www.tiktok.com/@user/video/123"
+opencliz tiktok save --url "https://www.tiktok.com/@user/video/123"
+opencliz tiktok unsave --url "https://www.tiktok.com/@user/video/123"
 
 # Follow/unfollow
-opencli tiktok follow --username nasa
-opencli tiktok unfollow --username nasa
+opencliz tiktok follow --username nasa
+opencliz tiktok unfollow --username nasa
 
 # Comment on a video
-opencli tiktok comment --url "https://www.tiktok.com/@user/video/123" --text "Great!"
+opencliz tiktok comment --url "https://www.tiktok.com/@user/video/123" --text "Great!"
 
 # JSON output
-opencli tiktok profile --username tiktok -f json
+opencliz tiktok profile --username tiktok -f json
 ```
 
 ## Prerequisites

@@ -6,19 +6,19 @@
 
 | Command | Description |
 |---------|-------------|
-| `opencli steam top-sellers` | Top selling games on Steam |
+| `opencliz steam top-sellers` | Top selling games on Steam |
 
 ## Usage Examples
 
 ```bash
 # Quick start
-opencli steam top-sellers
+opencliz steam top-sellers
 
 # Limit results
-opencli steam top-sellers --limit 5
+opencliz steam top-sellers --limit 5
 
 # JSON output
-opencli steam top-sellers -f json
+opencliz steam top-sellers -f json
 ```
 
 ## Prerequisites

@@ -1,4 +1,4 @@
-# Doubao App (豆包桌面版)
+# Doubao App (desktop)
 
 Control the **Doubao AI Desktop App** via Chrome DevTools Protocol (CDP).
 
@@ -17,13 +17,13 @@ Control the **Doubao AI Desktop App** via Chrome DevTools Protocol (CDP).
 
 | Command | Description |
 |---------|-------------|
-| `opencli doubao-app status` | Check CDP connection status |
-| `opencli doubao-app new` | Start a new conversation |
-| `opencli doubao-app send "message"` | Send a message to the current chat |
-| `opencli doubao-app read` | Read the latest assistant reply |
-| `opencli doubao-app ask "message"` | Send a prompt and wait for the reply |
-| `opencli doubao-app screenshot` | Capture a screenshot of the app window |
-| `opencli doubao-app dump` | Export DOM and snapshot debug info |
+| `opencliz doubao-app status` | Check CDP connection status |
+| `opencliz doubao-app new` | Start a new conversation |
+| `opencliz doubao-app send "message"` | Send a message to the current chat |
+| `opencliz doubao-app read` | Read the latest assistant reply |
+| `opencliz doubao-app ask "message"` | Send a prompt and wait for the reply |
+| `opencliz doubao-app screenshot` | Capture a screenshot of the app window |
+| `opencliz doubao-app dump` | Export DOM and snapshot debug info |
 
 ## How It Works
 
