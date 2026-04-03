@@ -1,0 +1,22 @@
+.{
+    .name = .opencli,
+    .version = "2.0.0",
+    .fingerprint = 0xd62c1e9047ad8674,
+    .minimum_zig_version = "0.14.0",
+    .dependencies = .{
+        .quickjs_ng = .{
+            .url = "git+https://github.com/mitchellh/zig-quickjs-ng#eb1d44ce43fd64f8403c1a94fad242ebae04d1fb",
+            .hash = "quickjs_ng-0.0.0-0cZnA8XHAwCc95T1GAebWrw-SGEwp1Y0fUAmilP8xGuS",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "scripts",
+        "docs",
+        "examples",
+        "LICENSE",
+        "README.md",
+    },
+}

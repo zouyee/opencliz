@@ -1,0 +1,35 @@
+# L2 P0：与 TS 并排 diff 前的「无网」基线（fixture 形状 + 全量单测）。
+# 手动在 Actions 里点「Run workflow」；与 push 触发的 zig-ci 互补，用于发版前或定期自检。
+name: L2 JSON parity (P0 dispatch)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: l2-json-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zig-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.15.2
+
+      - name: Cache Zig
+        uses: actions/cache@v4
+        with:
+          path: |
+            .zig-cache
+            .zig-global-cache
+          key: zig-l2-${{ hashFiles('build.zig.zon', 'build.zig') }}
+          restore-keys: |
+            zig-l2-
+
+      - name: zig build test (includes fixture_json_test)
+        env:
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: zig build test

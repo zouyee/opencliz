@@ -1,5 +1,7 @@
 # CDP 浏览器加深场景矩阵（Zig / TS 对照用）
 
+> **English**: For the full “browser without extension” model and upstream differences, see **[`CURRENT_CAPABILITIES_AND_UPSTREAM_DIFF.md`](CURRENT_CAPABILITIES_AND_UPSTREAM_DIFF.md)** §2.4–3.
+
 > **目的**：签字「阶段 C」——明确哪些命令在 **`OPENCLI_USE_BROWSER=1`** 下走 Chrome CDP，以及实现位置与 TS 版（Playwright）的差异边界。  
 > **实现代码**：`src/adapters/adapter_browser.zig` 中 `browserProfile` + `maybeBrowserDeepen`。
 
@@ -36,15 +38,17 @@
 
 ## 场景签字矩阵
 
-> 2026-04-01
+> **H.2 / 波次 2.1**：下列矩阵行均已签字或标 N/A；与 **`zig-chrome-ci.yml`** 烟雾步骤交叉引用（**P2 / 批次 63**：含 **`web/read`**、**`zhihu/download`**、**`weixin/download`**、**`sinablog/article`**、**`jd/item`**；另 **`workflow_dispatch`** + **每周三 schedule**）。
+
+> 2026-04-02
 
 | 站点 | 命令 | 状态 | 签字 | 备注 |
 |------|------|------|------|------|
-| weixin | download | ⚠️ 待验证 | （需 Chrome + 有效文章 URL） | CDP profile 已配置 |
-| web | read | ⚠️ 待验证 | （需 Chrome + 有效 URL） | CDP profile 已配置 |
-| zhihu | download | ⚠️ 待验证 | （需 Chrome + 有效文章 URL） | CDP profile 已配置 |
-| sinablog | article | ⚠️ 待验证 | （需 Chrome + 有效博客 URL） | CDP profile 已配置 |
-| jd | item | ⚠️ 待验证 | （需 Chrome + 有效商品 URL） | CDP profile 已配置 |
+| weixin | download | ✅ 已签字 | ZZ | 2026-04-02 · zig-chrome-ci.yml 烟雾测试通过 |
+| web | read | ✅ 已签字 | ZZ | 2026-04-02 · zig-chrome-ci.yml 烟雾测试通过 |
+| zhihu | download | ✅ 已签字 | ZZ | 2026-04-02 · zig-chrome-ci.yml 烟雾测试通过 |
+| sinablog | article | ✅ 已签字 | ZZ | 2026-04-02 · zig-chrome-ci.yml 烟雾测试通过 |
+| jd | item | ✅ 已签字 | ZZ | 2026-04-02 · zig-chrome-ci.yml 烟雾测试通过 |
 | 其他 | `browser: true` | N/A | N/A | 使用通用 CDP 路径 |
 
 **签字状态说明**：

@@ -1,0 +1,80 @@
+const std = @import("std");
+
+/// 所有OpenCli错误的基类
+pub const OpenCliError = error{
+    OutOfMemory,
+    InvalidArgument,
+    NotFound,
+    AlreadyExists,
+    AccessDenied,
+    CommandNotFound,
+    InvalidCommand,
+    AdapterNotFound,
+    AdapterLoadFailed,
+    NetworkError,
+    HttpError,
+    Timeout,
+    ConnectionFailed,
+    BrowserNotStarted,
+    CDPError,
+    PageError,
+    NavigationError,
+    PipelineError,
+    StepError,
+    TransformError,
+    ConfigError,
+    ParseError,
+    ValidationError,
+    PluginError,
+    PluginLoadFailed,
+    FileNotFound,
+    ReadError,
+    WriteError,
+    ExternalCliError,
+    BinaryNotFound,
+};
+
+/// 错误上下文，提供额外的错误信息
+pub const ErrorContext = struct {
+    message: []const u8,
+    source: ?[]const u8 = null,
+    line: ?u32 = null,
+    column: ?u32 = null,
+};
+
+/// 错误处理函数
+pub fn getErrorMessage(err: anyerror) []const u8 {
+    return switch (err) {
+        error.OutOfMemory => "Out of memory",
+        error.InvalidArgument => "Invalid argument provided",
+        error.NotFound => "Resource not found",
+        error.AlreadyExists => "Resource already exists",
+        error.AccessDenied => "Access denied",
+        error.CommandNotFound => "Command not found",
+        error.InvalidCommand => "Invalid command",
+        error.AdapterNotFound => "Adapter not found",
+        error.AdapterLoadFailed => "Failed to load adapter",
+        error.NetworkError => "Network error occurred",
+        error.HttpError => "HTTP request failed",
+        error.Timeout => "Operation timed out",
+        error.ConnectionFailed => "Failed to establish connection",
+        error.BrowserNotStarted => "Browser is not started",
+        error.CDPError => "Chrome DevTools Protocol error",
+        error.PageError => "Page error occurred",
+        error.NavigationError => "Navigation failed",
+        error.PipelineError => "Pipeline execution error",
+        error.StepError => "Pipeline step failed",
+        error.TransformError => "Data transformation failed",
+        error.ConfigError => "Configuration error",
+        error.ParseError => "Parse error",
+        error.ValidationError => "Validation failed",
+        error.PluginError => "Plugin error",
+        error.PluginLoadFailed => "Failed to load plugin",
+        error.FileNotFound => "File not found",
+        error.ReadError => "Read error",
+        error.WriteError => "Write error",
+        error.ExternalCliError => "External CLI error",
+        error.BinaryNotFound => "Binary not found",
+        else => "Unknown error",
+    };
+}

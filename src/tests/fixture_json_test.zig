@@ -16,19 +16,37 @@ const crates_info_item_min = @embedFile("../../tests/fixtures/json/crates_info_i
 const bilibili_user_item_min = @embedFile("../../tests/fixtures/json/bilibili_user_item_min.json");
 const bilibili_search_item_min = @embedFile("../../tests/fixtures/json/bilibili_search_item_min.json");
 const v2ex_member_item_min = @embedFile("../../tests/fixtures/json/v2ex_member_item_min.json");
+const zhihu_question_min = @embedFile("../../tests/fixtures/json/zhihu_question_min.json");
+const weibo_feed_item_min = @embedFile("../../tests/fixtures/json/weibo_feed_item_min.json");
+const npm_package_min = @embedFile("../../tests/fixtures/json/npm_package_min.json");
+const twitter_timeline_item_min = @embedFile("../../tests/fixtures/json/twitter_timeline_item_min.json");
+const douban_movie_min = @embedFile("../../tests/fixtures/json/douban_movie_min.json");
+const wikipedia_search_min = @embedFile("../../tests/fixtures/json/wikipedia_search_min.json");
+const youtube_transcript_min = @embedFile("../../tests/fixtures/json/youtube_transcript_min.json");
+const bilibili_dynamic_archive_fallback_min = @embedFile("../../tests/fixtures/json/bilibili_dynamic_archive_fallback_min.json");
+const reddit_read_comments_min = @embedFile("../../tests/fixtures/json/reddit_read_comments_min.json");
+const npm_package_registry_meta_min = @embedFile("../../tests/fixtures/json/npm_package_registry_meta_min.json");
+const github_trending_array_min = @embedFile("../../tests/fixtures/json/github_trending_array_min.json");
+const stackoverflow_items_wrapper_min = @embedFile("../../tests/fixtures/json/stackoverflow_items_wrapper_min.json");
+const hn_firebase_top_ids_min = @embedFile("../../tests/fixtures/json/hn_firebase_top_ids_min.json");
 
 test "fixture hn_item_min matches hackernews field expectations" {
     const allocator = std.testing.allocator;
     var parsed = try std.json.parseFromSlice(std.json.Value, allocator, hn_item_min, .{});
     defer parsed.deinit();
 
+    try std.testing.expect(format.getNestedValue(parsed.value, "id").integer == 12345);
     const title = format.getNestedValue(parsed.value, "title");
     try std.testing.expect(title == .string);
     try std.testing.expectEqualStrings("Test Story", title.string);
+    try std.testing.expectEqualStrings("https://example.com", format.getNestedValue(parsed.value, "url").string);
+    try std.testing.expectEqualStrings("testuser", format.getNestedValue(parsed.value, "by").string);
+    try std.testing.expect(format.getNestedValue(parsed.value, "time").integer == 1234567890);
 
     const score = format.getNestedValue(parsed.value, "score");
     try std.testing.expect(score == .integer);
     try std.testing.expect(score.integer == 100);
+    try std.testing.expect(format.getNestedValue(parsed.value, "descendants").integer == 50);
 }
 
 test "fixture bilibili_hot_item_min nested paths" {
@@ -64,6 +82,47 @@ test "fixture bilibili_dynamic_item_min nested paths" {
     const likes = format.getNestedValue(parsed.value, "modules.module_stat.like.count");
     try std.testing.expect(likes == .integer);
     try std.testing.expect(likes.integer == 9);
+}
+
+test "fixture bilibili_dynamic_archive_fallback_min desc null and archive title" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, bilibili_dynamic_archive_fallback_min, .{});
+    defer parsed.deinit();
+
+    const desc_text = format.getNestedValue(parsed.value, "modules.module_dynamic.desc.text");
+    try std.testing.expect(desc_text == .null);
+
+    const archive_title = format.getNestedValue(parsed.value, "modules.module_dynamic.major.archive.title");
+    try std.testing.expectEqualStrings("Video title", archive_title.string);
+
+    try std.testing.expectEqualStrings("Bob", format.getNestedValue(parsed.value, "modules.module_author.name").string);
+    try std.testing.expect(format.getNestedValue(parsed.value, "modules.module_stat.like.count").integer == 3);
+}
+
+test "fixture github_trending_array_min first row matches trending extract paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, github_trending_array_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expect(parsed.value == .array);
+    const first = parsed.value.array.items[0];
+    try std.testing.expectEqualStrings("owner/repo", format.getNestedValue(first, "fullName").string);
+    try std.testing.expectEqualStrings("Test repo", format.getNestedValue(first, "description").string);
+    try std.testing.expectEqualStrings("Rust", format.getNestedValue(first, "language").string);
+    try std.testing.expect(format.getNestedValue(first, "stars").integer == 100);
+}
+
+test "fixture stackoverflow_items_wrapper_min items[0] paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, stackoverflow_items_wrapper_min, .{});
+    defer parsed.deinit();
+
+    const items = parsed.value.object.get("items").?;
+    const first = items.array.items[0];
+    try std.testing.expect(format.getNestedValue(first, "question_id").integer == 12345);
+    try std.testing.expectEqualStrings("Test Question", format.getNestedValue(first, "title").string);
+    try std.testing.expectEqualStrings("user1", format.getNestedValue(first, "owner.display_name").string);
+    try std.testing.expect(format.getNestedValue(first, "answer_count").integer == 5);
 }
 
 test "fixture github_repo_min column keys" {
@@ -119,6 +178,20 @@ test "fixture reddit_hot_item_min nested paths" {
     const num_comments = format.getNestedValue(parsed.value, "data.num_comments");
     try std.testing.expect(num_comments == .integer);
     try std.testing.expect(num_comments.integer == 42);
+}
+
+test "fixture reddit_read_comments_min thread array shape" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, reddit_read_comments_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expect(parsed.value == .array);
+    const first = parsed.value.array.items[0];
+    try std.testing.expectEqualStrings("POST", format.getNestedValue(first, "type").string);
+    try std.testing.expectEqualStrings("alice", format.getNestedValue(first, "author").string);
+    try std.testing.expect(format.getNestedValue(first, "score").integer == 10);
+    const second = parsed.value.array.items[1];
+    try std.testing.expectEqualStrings("L0", format.getNestedValue(second, "type").string);
 }
 
 test "fixture youtube_video_item_min nested paths" {
@@ -195,4 +268,111 @@ test "fixture v2ex_member_item_min nested paths" {
 
     try std.testing.expectEqualStrings("testuser", format.getNestedValue(parsed.value, "username").string);
     try std.testing.expectEqualStrings("Test user bio", format.getNestedValue(parsed.value, "bio").string);
+}
+
+test "fixture zhihu_question_min nested paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, zhihu_question_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expectEqual(@as(i64, 12345), format.getNestedValue(parsed.value, "question_id").integer);
+    try std.testing.expectEqualStrings("Test Question", format.getNestedValue(parsed.value, "title").string);
+    try std.testing.expectEqualStrings("TestUser", format.getNestedValue(parsed.value, "author.name").string);
+    try std.testing.expectEqual(@as(i64, 5), format.getNestedValue(parsed.value, "answer_count").integer);
+    try std.testing.expectEqual(@as(i64, 10), format.getNestedValue(parsed.value, "score").integer);
+}
+
+test "fixture weibo_feed_item_min nested paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, weibo_feed_item_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expectEqualStrings("9876543210", format.getNestedValue(parsed.value, "id").string);
+    try std.testing.expectEqualStrings("Test weibo post content", format.getNestedValue(parsed.value, "text").string);
+    try std.testing.expectEqualStrings("TestUser", format.getNestedValue(parsed.value, "user.name").string);
+    try std.testing.expectEqual(@as(i64, 42), format.getNestedValue(parsed.value, "reposts_count").integer);
+    try std.testing.expectEqual(@as(i64, 15), format.getNestedValue(parsed.value, "comments_count").integer);
+    try std.testing.expectEqual(@as(i64, 100), format.getNestedValue(parsed.value, "attitudes_count").integer);
+}
+
+test "fixture npm_package_min nested paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, npm_package_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expectEqualStrings("express", format.getNestedValue(parsed.value, "name").string);
+    try std.testing.expectEqualStrings("4.18.2", format.getNestedValue(parsed.value, "version").string);
+    try std.testing.expectEqualStrings("Fast, unopinionated, minimalist web framework", format.getNestedValue(parsed.value, "description").string);
+    try std.testing.expectEqualStrings("4.18.2", format.getNestedValue(parsed.value, "dist-tags.latest").string);
+}
+
+test "fixture npm_package_registry_meta_min time.modified path" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, npm_package_registry_meta_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expectEqualStrings("test-package", format.getNestedValue(parsed.value, "name").string);
+    try std.testing.expectEqualStrings("1.0.0", format.getNestedValue(parsed.value, "version").string);
+    try std.testing.expectEqualStrings("Test package description", format.getNestedValue(parsed.value, "description").string);
+    try std.testing.expectEqualStrings("2024-01-01T00:00:00Z", format.getNestedValue(parsed.value, "time.modified").string);
+}
+
+test "fixture twitter_timeline_item_min nested paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, twitter_timeline_item_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expectEqualStrings("123", format.getNestedValue(parsed.value, "rest_id").string);
+    try std.testing.expectEqualStrings("Hello tweet", format.getNestedValue(parsed.value, "legacy.full_text").string);
+    try std.testing.expect(format.getNestedValue(parsed.value, "legacy.favorite_count").integer == 5);
+    try std.testing.expectEqualStrings("alice", format.getNestedValue(parsed.value, "core.user_results.result.legacy.screen_name").string);
+}
+
+test "fixture douban_movie_min nested paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, douban_movie_min, .{});
+    defer parsed.deinit();
+
+    try std.testing.expectEqualStrings("12345", format.getNestedValue(parsed.value, "id").string);
+    try std.testing.expectEqualStrings("Test Movie", format.getNestedValue(parsed.value, "title").string);
+    const rating = format.getNestedValue(parsed.value, "rating.value");
+    try std.testing.expect(rating == .float);
+    try std.testing.expect(rating.float == 8.5);
+    try std.testing.expectEqualStrings("Director 1", format.getNestedValue(parsed.value, "director_name").string);
+    try std.testing.expect(format.getNestedValue(parsed.value, "year").integer == 2024);
+}
+
+test "fixture wikipedia_search_min nested paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, wikipedia_search_min, .{});
+    defer parsed.deinit();
+
+    const pages = parsed.value.object.get("query").?.object.get("pages").?;
+    const first = pages.array.items[0];
+    try std.testing.expect(format.getNestedValue(first, "pageid").integer == 12345);
+    try std.testing.expectEqualStrings("Test Article", format.getNestedValue(first, "title").string);
+    try std.testing.expectEqualStrings("Test extract text...", format.getNestedValue(first, "extract").string);
+}
+
+test "fixture youtube_transcript_min segment paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, youtube_transcript_min, .{});
+    defer parsed.deinit();
+
+    const segments = parsed.value.object.get("segments").?;
+    const first = segments.array.items[0];
+    const start = format.getNestedValue(first, "start");
+    try std.testing.expect(start == .integer or start == .float);
+    try std.testing.expectEqualStrings("Hello there.", format.getNestedValue(first, "text").string);
+}
+
+test "fixture hn_firebase_top_ids_min is id array" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, hn_firebase_top_ids_min, .{});
+    defer parsed.deinit();
+    try std.testing.expect(parsed.value == .array);
+    try std.testing.expectEqual(@as(usize, 3), parsed.value.array.items.len);
+    try std.testing.expect(parsed.value.array.items[0] == .integer);
+    try std.testing.expectEqual(@as(i64, 9128456), parsed.value.array.items[0].integer);
+    try std.testing.expectEqual(@as(i64, 9128455), parsed.value.array.items[1].integer);
 }

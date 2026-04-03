@@ -1,0 +1,21 @@
+# Auto-generated adapter for Golden Explore Page
+name: golden
+version: "1.0.0"
+description: Auto-generated adapter for Golden Explore Page
+site: golden
+domain: https://example.test
+strategy: public
+
+commands:
+  widgets:
+    name: widgets
+    description: Auto-generated command
+    args: []
+    pipeline:
+      steps:
+        - name: fetch_widgets
+          type: fetch
+          config:
+            url: "https://example.test/api/v1/widgets"
+            method: GET
+

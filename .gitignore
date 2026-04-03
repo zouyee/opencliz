@@ -1,0 +1,28 @@
+# Zig（本地全局缓存，见 build.sh 中 ZIG_GLOBAL_CACHE_DIR）
+.zig-global-cache/
+
+node_modules/
+dist/
+!extension/dist/
+*.tsbuildinfo
+.opencli/
+parity-output/
+.mcp.json
+*.log
+.DS_Store
+
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
+
+# Extensions & Secrets
+*.pem
+*.crx
+*.zip
+.envrc
+.windsurf
+.claude
+.cortex
+
+# Database files
+*.db

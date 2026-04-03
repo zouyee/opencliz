@@ -17,6 +17,12 @@ The daemon will start on `http://127.0.0.1:8080` by default.
 | `OPENCLI_DAEMON_PORT` | Listen port (default `8080`) |
 | `OPENCLI_DAEMON_HOST` | Bind address (default `127.0.0.1`) |
 | `OPENCLI_DAEMON_AUTH_TOKEN` | If set, **all** routes (except `OPTIONS` preflight) require one of the credentials below |
+| `OPENCLI_DAEMON_REQUEST_TIMEOUT_MS` | 单连接读取完整 HTTP 请求（头+体）的总超时，毫秒；默认 `30000`；`0` 表示不限制（与旧行为一致；慎用） |
+| `OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS` | **`/execute` 内**命令执行 wall-clock 超时（毫秒）；默认 `0` = 不限制。超时返回 **504** + `{"error":"Execute timeout"}`；宿主仍会 **join** 工作线程（**不取消**正在运行的子进程/网络请求） |
+
+curl 后端（`HttpClient.request`）另支持 **`OPENCLI_HTTP_FOLLOW_REDIRECTS`**（`0` 关闭 `-L`）、**`OPENCLI_HTTP_MAX_REDIRECTS`**（默认 `10`）、**`OPENCLI_HTTP_MAX_OUTPUT_BYTES`**（`Child.run` 上限，默认 20 MiB）。
+
+**适配器 HTTP（`serve` / CLI 共用进程）**：**`OPENCLI_CACHE=0`** 关闭 **`http_exec`** 内 **`fetchJson`** 的进程内 JSON 响应缓存（与 TS 并排 diff 时建议关闭）；TTL/条数上限见 **`OPENCLI_CACHE_HTTP_TTL_MS`** 等（**`CacheManager.initFromEnv`**）。
 
 ## API Endpoints
 
@@ -102,6 +108,8 @@ curl -X POST "http://localhost:8080/execute/github/trending" \
 }
 ```
 
+若设置 **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS` > 0** 且执行超过该时长：**504** + `{"error":"Execute timeout"}`。
+
 ## Configuration
 
 Runtime options are driven by **environment variables** (see above). Conceptual fields:
@@ -109,7 +117,9 @@ Runtime options are driven by **environment variables** (see above). Conceptual 
 - `host` / `port`: from `OPENCLI_DAEMON_HOST` / `OPENCLI_DAEMON_PORT`
 - `auth_token`: from `OPENCLI_DAEMON_AUTH_TOKEN`
 - `enable_cors`: enabled in code (default **true**); responses include `Access-Control-*` headers
-- `max_connections` / `request_timeout_ms`: reserved for future use in the Zig daemon
+- `request_timeout_ms`: from `OPENCLI_DAEMON_REQUEST_TIMEOUT_MS`（读请求阶段）
+- `execute_timeout_ms`: from `OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS`（`/execute` 内执行；`0` 关闭）
+- `max_connections`: 仍为预留字段（当前 accept 循环未做连接数硬限制）
 
 ## Authentication
 
@@ -183,9 +193,9 @@ curl -s "${DAEMON_URL}/execute/github/trending?language=$1" | jq '.data[0].full_
 
 | File | What it covers |
 |------|----------------|
-| **`src/tests/daemon_contract_test.zig`** | Handler-only: JSON shapes, `auth_token`, `OPTIONS`, `parseHttpRequest`, `POST` body merge, `dispatchHttpRequest` wire output |
-| **`src/tests/daemon_tcp_e2e_test.zig`** | Real TCP: `accept`, full request read, response write (health + authenticated `POST /execute/...`) |
-| **`src/tests/ai_explore_golden_test.zig`** | `exploreFromHtml` on fixture HTML + `Synthesizer` output vs **`tests/fixtures/golden/synthesizer_golden.yaml`** |
+| **`src/tests/daemon_contract_test.zig`** | Handler-only: JSON shapes, `auth_token`（**Bearer** / **`X-OpenCLI-Token`** / **query `token`**）、错误 Bearer→**401**、`OPTIONS` 在要求鉴权时仍 **204**、未知命令 **`/execute/...`**→**404**（无 runner 亦先判命令）、`parseHttpRequest`、`POST` body merge、`dispatchHttpRequest` wire output |
+| **`src/tests/daemon_tcp_e2e_test.zig`** | Real TCP: **`GET /`**、`GET /health`、鉴权开启时无凭证 **401**、**`X-OpenCLI-Token`** 通过、带 Bearer 的 **`POST /execute/...`**（ts_legacy 桩） |
+| **`src/tests/ai_explore_golden_test.zig`** | `exploreFromHtml` on **`explore_sample.html`** + **`explore_edge_min.html`** + `Synthesizer` vs **`tests/fixtures/golden/synthesizer_golden.yaml`** |
 
 Run: `zig build test`.
 
@@ -206,7 +216,7 @@ Run: `zig build test`.
 
 | 维度 | TS 版 | Zig 版 |
 |------|-------|--------|
-| 请求超时 | 可能有 | `max_connections` / `request_timeout_ms` 预留字段，**未实现** |
+| 请求超时 | 可能有 | **`readHttpRequestFromStream`** 按 **`request_timeout_ms`** / **`OPENCLI_DAEMON_REQUEST_TIMEOUT_MS`** 在读请求阶段生效；超时 **408**。执行阶段可选 **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS`**（**504**；不取消子进程，见上文） |
 | WebSocket | TS 可能支持 | **不支持**（纯 HTTP） |
 | 批量执行 | TS 可能支持 | **不支持** |
 | 端点前缀 | TS 可能是 `/api/` | Zig 直接用根路径 `/` |
@@ -214,12 +224,19 @@ Run: `zig build test`.
 
 ### 待对照项（若 TS 版本有）
 
-| 潜在差异 | 说明 |
-|----------|------|
-| `/api/commands` vs `/commands` | 需确认 TS 路由前缀 |
-| `/api/execute/...` | 需确认 TS 是否有 `/api` 前缀 |
-| 认证 middleware | TS 可能有独立 auth middleware |
-| 请求/响应拦截器 | TS 可能有钩子机制 |
-| keep-alive | HTTP 长连接支持情况 |
+| 潜在差异 | 状态 | 说明 |
+|----------|------|------|
+| `/api/commands` vs `/commands` | ⚠️ 需确认 | Zig 用 `/commands` |
+| `/api/execute/...` | ⚠️ 需确认 | Zig 用 `/execute/...` |
+| 认证 middleware | ✅ 已一致 | Bearer / **`X-OpenCLI-Token`** / query；**批次 62** 单测覆盖错误凭证与 **OPTIONS** 绕过 |
+| 请求/响应拦截器 | N/A | Zig 无此概念 |
+| keep-alive | ⚠️ 需确认 | 需测 TS 版 |
+| 未知命令错误码 | ✅ 与 REST 常见语义一致 | **`/execute`** 未注册命令 → **404** + **`{"error":"Command not found"}`**（**批次 65**；与 **`DAEMON_API`** 示例一致） |
 
-**注意**：字节级一致**不**是目标；以「同命令同参数同响应结构」为验收口径。
+### L7 阶段 H.4 签字
+
+| 层级 | 覆盖范围 | 对照基线 | 签字 | 日期 | 备注 |
+|------|----------|----------|------|------|------|
+| L7 | Daemon HTTP + explore/synthesize golden | 本文 + `daemon_*_test`（**批次 62** 扩鉴权/根路径/TCP）/ `ai_explore_golden_test`；TS 以各仓库 `daemon` 实现为准 | ZZ | 2026-04-01 | 前缀/WebSocket/批量等差异见上表「Zig vs TS」 |
+
+**注意**：字节级一致**不**是目标；以「同命令同参数同响应结构」为验收口径。CLI **`explore` / `synthesize`** 与 Daemon 解耦；L7 扩测时一并记录 TS 行为差异。

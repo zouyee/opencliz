@@ -1,0 +1,75 @@
+name: bilibili
+version: "1.0.0"
+description: Bilibili video platform adapter
+site: bilibili
+domain: bilibili.com
+strategy: public
+browser: false
+
+commands:
+  hot:
+    name: hot
+    description: Get trending videos
+    args:
+      - name: limit
+        description: Number of videos to show
+        type: integer
+        required: false
+        default: "10"
+    
+    pipeline:
+      steps:
+        - name: fetch_hot
+          type: fetch
+          config:
+            url: "https://api.bilibili.com/x/web-interface/popular"
+            method: GET
+            extract: "data.list"
+        
+        - name: limit_results
+          type: transform
+          config:
+            operation: limit
+            count: "{{args.limit}}"
+    
+    columns:
+      - name: Title
+        key: title
+        width: 50
+      - name: Author
+        key: owner.name
+        width: 20
+      - name: Views
+        key: stat.view
+        format: number
+  
+  search:
+    name: search
+    description: Search videos on Bilibili
+    args:
+      - name: query
+        description: Search query
+        type: string
+        required: true
+      - name: limit
+        description: Number of results
+        type: integer
+        required: false
+        default: "10"
+    
+    pipeline:
+      steps:
+        - name: fetch_search
+          type: fetch
+          config:
+            url: "https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword={{args.query}}"
+            method: GET
+            extract: "data.result"
+    
+    columns:
+      - name: Title
+        key: title
+      - name: Author
+        key: author
+      - name: Views
+        key: play

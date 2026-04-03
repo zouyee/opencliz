@@ -22,7 +22,8 @@
 
 ### 写路径 Cookie 手工回归步骤
 
-> 2026-04-01
+> 2026-04-01  
+> 命令速查：**`scripts/regression_cookie_writepath.sh`**（与下文一致）。
 
 以下写路径命令需要 Cookie 认证。手工回归测试步骤：
 
@@ -100,10 +101,16 @@ export OPENCLI_V2EX_COOKIE="v2ex_session_cookie_here"
 | 微信 | 公众号 OAuth | Cookie 注入可用；**无内嵌 OAuth 流程** | ✅ 不实现设备码 |
 | Bilibili | OAuth 2.0 | Cookie 注入可用；**无内嵌 OAuth 流程** | ✅ 不实现设备码 |
 
-**不实现原因**：
-1. OAuth 流程需要处理回调 URL、状态参数、安全密钥等，增加复杂度和安全风险
-2. 用户应自行管理 Token，通过环境变量注入
-3. 与开源项目「零依赖」原则一致
+### OAuth / Device flow 决策签字（Wave 2.2）
+
+> 2026-04-02
+
+| 站点 | 决策 | 理由 | 签字 | 日期 |
+|------|------|------|------|------|
+| bilibili | 不实现设备码 | 用户自行管理 Token；Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
+| github | 不实现设备码 | Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
+| reddit | 不实现设备码 | Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
+| twitter | 不实现设备码 | Cookie/Header 替代方案足够 | ZZ | 2026-04-02 |
 
 **替代方案**：
 ```bash
@@ -111,6 +118,31 @@ export OPENCLI_V2EX_COOKIE="v2ex_session_cookie_here"
 export OPENCLI_COOKIE="your_session_cookie"
 export OPENCLI_<SITE>_COOKIE="your_site_specific_cookie"
 ```
+
+**不实现原因**：
+1. OAuth 流程需要处理回调 URL、状态参数、安全密钥等，增加复杂度和安全风险
+2. 用户应自行管理 Token，通过环境变量注入
+3. 与开源项目「零依赖」原则一致
+
+---
+
+## P1：高频站点读/写边界签字矩阵
+
+> **用途**：把「Zig 与 TS 在登录态、写路径、浏览器依赖上能承诺什么」收敛成**可引用的一页**（**非**字节级与 TS 一致）。与 **`docs/CDP_SCENARIO_MATRIX.md`**、**`scripts/regression_cookie_writepath.sh`** 并用。  
+> **签字**：ZZ · **2026-04-01**
+
+| 站点/域 | 公开读（无 Cookie） | 需登录读 | 写路径（Zig） | 与 TS 对齐方式 | 备注 |
+|---------|---------------------|----------|---------------|----------------|------|
+| HN / npm / PyPI / crates / SO 公开 API 等 | ✅ HTTP 适配器为主 | — | 一般无 | L2 fixture + **`compare_command_json.sh`** | 改版以 **`status`** 为准 |
+| GitHub（公开） | ✅ | 私有仓库等 | 无内嵌 OAuth | **`OPENCLI_GITHUB_COOKIE`**；设备码 **不实现**（Wave 2.2） | 与 TS 私有 API 深度 **不承诺** |
+| Bilibili | ✅ 部分接口 | 收藏夹/账号维度 | 注册对齐 | **`OPENCLI_BILIBILI_COOKIE`**；见上文回归 | 风控/字段漂移见 issue |
+| V2EX | ✅ 列表等 | 通知 / `me` | 读为主 | **`OPENCLI_V2EX_COOKIE`** | 见上文回归 |
+| Reddit | ✅ 部分 | 关注流等 | upvote/save/comment 等 | **`OPENCLI_COOKIE`** 或站点变量 | 见 **`regression_cookie_writepath.sh`** |
+| 知乎 / 微博 / Twitter(X) | ⚠️ 易登录壳/反爬 | ✅ | 写 **不承诺**全量 | Cookie + 可选 **`OPENCLI_USE_BROWSER=1`**；**无设备码** | 与 TS Playwright 深度 **不对等** |
+| 微信 / weixin | ⚠️ 多依赖 CDP 或 Cookie | ✅ | 矩阵内场景 | **`CDP_SCENARIO_MATRIX.md`** | 仅认矩阵勾选 |
+| 即刻、豆包/ChatWise 桌面等 | 视 YAML | 混合 | 写路径 **不保证** | **`desktop_exec`** + 本机环境 | 见 **`MIGRATION_GAP`** |
+
+**验收口径**：无凭据时返回结构化 **`status`**（如 **`login_required`**），**不**使用裸字符串 **`todo`**；有凭据时以各站 **`regression_cookie_writepath.sh`** 与手工步骤为准。
 
 ---
 

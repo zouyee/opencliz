@@ -1,0 +1,1 @@
+{"name":"express","version":"4.18.2","description":"Fast, unopinionated, minimalist web framework","dist-tags":{"latest":"4.18.2"},"maintainers":[{"name":"dougwilson"},{"name":"jonchurch"}],"time":"2024-01-15T10:30:00.000Z","dependencies":{"accepts":"~1.3.8","array-flatten":"1.1.1"},"score":{"final":0.9,"detail":{"popularity":0.99,"quality":0.95,"maintenance":0.85}}}

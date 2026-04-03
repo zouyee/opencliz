@@ -1,0 +1,35 @@
+- name: gh
+  binary: gh
+  description: "GitHub CLI — repos, PRs, issues, releases, gists"
+  homepage: "https://cli.github.com"
+  tags: [github, git, dev]
+  install:
+    mac: "brew install gh"
+
+- name: obsidian
+  binary: obsidian
+  description: "Obsidian vault management — notes, search, tags, tasks, sync"
+  homepage: "https://obsidian.md/help/cli"
+  tags: [notes, knowledge, markdown]
+  install:
+    mac: "brew install --cask obsidian"
+
+- name: docker
+  binary: docker
+  description: "Docker command-line interface"
+  homepage: "https://docs.docker.com/engine/reference/commandline/cli/"
+  tags: [docker, containers, devops]
+  install:
+    mac: "brew install --cask docker"
+
+- name: echo
+  binary: /bin/echo
+  description: "Echo command"
+  install:
+    mac: "built-in"
+
+- name: which
+  binary: /usr/bin/which
+  description: "Which command"
+  install:
+    mac: "built-in"

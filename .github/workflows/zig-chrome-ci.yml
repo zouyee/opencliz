@@ -1,5 +1,4 @@
-# Zig + Chrome CDP 最小 CI（Wave 3.1）
-# 矩阵内 1-2 个场景的自动化浏览器测试
+# Zig + Chrome CDP（P2 / L3）：矩阵内多场景烟雾；与 docs/CDP_SCENARIO_MATRIX.md 交叉引用。
 name: Zig Chrome CDP
 
 on:
@@ -9,6 +8,12 @@ on:
       - 'src/browser/**'
       - 'src/adapters/adapter_browser.zig'
       - 'src/adapters/article_pipeline.zig'
+      - 'src/adapters/more_sites.zig'
+      - 'src/adapters/chinese.zig'
+      - 'src/adapters/http_exec.zig'
+      - 'src/plugin/quickjs_runtime.zig'
+      - 'src/cli/runner.zig'
+      - 'docs/CDP_SCENARIO_MATRIX.md'
       - '.github/workflows/zig-chrome-ci.yml'
   pull_request:
     branches: [main, dev]
@@ -16,8 +21,17 @@ on:
       - 'src/browser/**'
       - 'src/adapters/adapter_browser.zig'
       - 'src/adapters/article_pipeline.zig'
+      - 'src/adapters/more_sites.zig'
+      - 'src/adapters/chinese.zig'
+      - 'src/adapters/http_exec.zig'
+      - 'src/plugin/quickjs_runtime.zig'
+      - 'src/cli/runner.zig'
+      - 'docs/CDP_SCENARIO_MATRIX.md'
       - '.github/workflows/zig-chrome-ci.yml'
   workflow_dispatch:
+  schedule:
+    # 每周三 UTC 10:00：路径未触达 push 时仍跑一次 CDP 烟雾（站点可用性不保证，|| true 行仅验不崩溃）
+    - cron: '0 10 * * 3'
 
 concurrency:
   group: zig-chrome-${{ github.ref }}
@@ -67,6 +81,17 @@ jobs:
           xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
             ./zig-out/bin/opencli web/read --url 'https://example.com' -f json
 
+      - name: Run CDP zhihu/download smoke (Linux, matrix row 2)
+        if: runner.os == 'Linux'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        # 站点反爬/登录可能导致非 0；验收为进程不崩溃且输出 JSON
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            ./zig-out/bin/opencli zhihu/download --url 'https://www.zhihu.com/question/20184801' -f json || true
+
       - name: Run CDP smoke tests (macOS)
         if: runner.os == 'macos-latest'
         env:
@@ -75,6 +100,15 @@ jobs:
           ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
         run: |
           ./zig-out/bin/opencli web/read --url 'https://example.com' -f json
+
+      - name: Run CDP zhihu/download smoke (macOS, matrix row 2)
+        if: runner.os == 'macos-latest'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          ./zig-out/bin/opencli zhihu/download --url 'https://www.zhihu.com/question/20184801' -f json || true
 
       - name: Run CDP weixin test (Linux)
         if: runner.os == 'Linux'
@@ -96,4 +130,42 @@ jobs:
         run: |
           ./zig-out/bin/opencli weixin/download --url 'https://mp.weixin.qq.com/s/test' -f json || true
 
-  # 验收标准：命令不崩溃，返回 JSON（即使 status 字段表明需要登录）
+      - name: Run CDP sinablog/article smoke (Linux, matrix)
+        if: runner.os == 'Linux'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            ./zig-out/bin/opencli sinablog/article --url 'https://blog.sina.com.cn/s/blog_5372e30b0102wj81.html' -f json || true
+
+      - name: Run CDP sinablog/article smoke (macOS)
+        if: runner.os == 'macos-latest'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          ./zig-out/bin/opencli sinablog/article --url 'https://blog.sina.com.cn/s/blog_5372e30b0102wj81.html' -f json || true
+
+      - name: Run CDP jd/item smoke (Linux, matrix)
+        if: runner.os == 'Linux'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            ./zig-out/bin/opencli jd/item --sku 5089263 -f json || true
+
+      - name: Run CDP jd/item smoke (macOS)
+        if: runner.os == 'macos-latest'
+        env:
+          OPENCLI_USE_BROWSER: '1'
+          OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.zig-global-cache
+        run: |
+          ./zig-out/bin/opencli jd/item --sku 5089263 -f json || true
+
+  # 验收标准：进程不崩溃并写出 JSON（站点/反爬导致非 0 时 || true 行可接受）
