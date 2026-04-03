@@ -16,12 +16,23 @@
 
 **Tired of waiting for CLI tools to start? You'll love a native binary.**
 
-| Metric | Node.js Tools | **opencliz** |
-|--------|--------------|-------------|
-| Cold startup | 500ms | **~3ms** |
-| Memory usage | 150MB | **~1.6MB** |
-| Binary size | 50MB+ | **~3.5MB** |
-| Dependencies | 100+ packages | **Zero** |
+| Metric | Node.js tools (typical) | **opencliz** | **Gain (approx.)** |
+|--------|-------------------------|--------------|-------------------|
+| Cold startup | ~500ms | **~3ms** | **~100×+ faster** (process only; measure locally) |
+| Memory (idle) | ~150MB | **~1.6MB** | **~100× lower RSS** |
+| Binary size | 50MB+ (runtime + app) | **~5–6MB** (ReleaseFast; platform-dependent) | **~9–10× smaller** vs ~50MB baseline |
+| Runtime dependencies | 100+ npm packages + Node | **No `node_modules`**; Zig stdlib + `build.zig.zon` (e.g. QuickJS-ng), static link | **No Node/npm at run time** |
+
+**Command scenarios** (order-of-magnitude; **adapter wall time is usually network-bound**, so end-to-end speedup is smaller than startup alone):
+
+| Scenario | Node / `opencli` (typical) | **opencliz** (typical) | **Gain (approx.)** |
+|----------|----------------------------|------------------------|-------------------|
+| `--version` | ~200–500ms cold | **<1ms** | **~200–500×** (startup-dominated) |
+| `list` | ~50–150ms | **~1ms** | **~50–150×** (startup + registry) |
+| `bilibili/hot --limit 3` | startup + ~100–500ms HTTP | **~100–200ms** total (example; CDN varies) | **Startup + RAM** win; wall clock often **similar** once HTTP dominates |
+| `hackernews/top --limit 3` | startup + API latency | **~1–3s** (example; Firebase/API bound) | Mostly **memory / deploy** win |
+
+See **`PERFORMANCE_REPORT.md`** for methodology and how to reproduce timings.
 
 **If you answer yes to any of these, opencliz is for you:**
 
@@ -76,11 +87,13 @@ zig build
 
 ## 📊 Performance
 
-| Metric | TypeScript OpenCLI | **opencliz** | Note |
-|--------|-------------------|-------------|------|
-| Cold startup | ~500ms class | **~3–4ms** class | Measure locally |
-| Memory (idle) | ~150MB class | **~1–2MB** class | Measure locally |
-| Binary size | 50MB+ with runtime | **~3.5MB** | ReleaseFast |
+| Metric | TypeScript OpenCLI | **opencliz** | **Gain (approx.)** |
+|--------|-------------------|-------------|-------------------|
+| Cold startup | ~500ms class | **~3–4ms** class | **~100×+ faster** |
+| Memory (idle) | ~150MB class | **~1–2MB** class | **~75–100× lower** |
+| Binary size | 50MB+ with runtime | **~5–6MB** | **~9–10× smaller** vs ~50MB baseline |
+
+Same **command scenarios** table as in [Why opencliz?](#why-opencliz) above; full notes in **`PERFORMANCE_REPORT.md`**.
 
 ---
 
