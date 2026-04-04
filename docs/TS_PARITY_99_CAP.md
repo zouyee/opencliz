@@ -1,7 +1,7 @@
 # “~99.99% parity with TS”: definition, plan mapping, and achievable cap
 
 > This turns informal **“align with TS as much as possible”** into **testable** wording. **TS** means upstream [**jackwener/opencli**](https://github.com/jackwener/opencli) (**`docs/UPSTREAM_REFERENCE.md`**). Maps to **`TS_PARITY_MIGRATION_PLAN.md`** (phases A–G) and **`TS_PARITY_REMAINING.md`** (L2–L7).  
-> **Important**: **99.9999%** is not a computable ratio; below we use **achievable cap**: the boundary this repo can still approach **without** embedding Node, **without** promising every site online, **without** holding user secrets.
+> **Important**: **99.9999%** is not a computable ratio; below we use **achievable cap**: the boundary this repo can still approach **without** embedding **Node.js** (optional **Bun** subprocess only for `ts_legacy`; see **`RUNTIME_MODEL.md`**), **without** promising every site online, **without** holding user secrets.
 
 ---
 
@@ -58,9 +58,9 @@ Ordered list to **increase TS similarity**; tick **`TS_PARITY_REMAINING.md` §4*
 |---|------|-------|------------|
 | 3.7 | Zig + Chrome CI subset (matrix scenarios + optional weekly schedule) | L3 | **`zig-chrome-ci.yml`** green (batch **63**: five scenarios + Wed cron) |
 | 3.8 | QuickJS **`opencli` HTTP** native bridge (allowlist, timeout, error mapping) | L6 | Security review + tests |
-| 3.9 | If **`type: ts` must run**: **Node subprocess** (`OPENCLI_ENABLE_NODE_SUBPROCESS=1`, implemented) | L6 | Coexistence with `ts_legacy` policy documented |
+| 3.9 | If **`type: ts` must run**: **Bun subprocess** (`OPENCLI_ENABLE_BUN_SUBPROCESS=1`, implemented; **not** Node) | L6 | Coexistence with `ts_legacy` policy documented |
 
-> **Batch 52**: **3.7** (`zig-chrome-ci.yml`: `web/read` + `zhihu/download`), **3.8** (QuickJS **`__opencli_http_*`** + allowlist/timeout tests) delivered; **3.9** adds **`OPENCLI_NODE_SUBPROCESS_TIMEOUT_MS`** / **`OPENCLI_NODE_MAX_OUTPUT_BYTES`** (**`PLUGIN_QUICKJS.md`**). **Batch 63** extends **3.7** (**sinablog/article**, **jd/item**, weekly schedule) and **L6 `error` table**.
+> **Batch 52**: **3.7** (`zig-chrome-ci.yml`: `web/read` + `zhihu/download`), **3.8** (QuickJS **`__opencli_http_*`** + allowlist/timeout tests) delivered; **3.9** adds **`OPENCLI_BUN_SUBPROCESS_TIMEOUT_MS`** / **`OPENCLI_BUN_MAX_OUTPUT_BYTES`** (**`PLUGIN_QUICKJS.md`**; Bun replaces Node). **Batch 63** extends **3.7** (**sinablog/article**, **jd/item**, weekly schedule) and **L6 `error` table**.
 
 ### P3 — UX alignment (not full feature parity)
 
@@ -78,7 +78,7 @@ Ordered list to **increase TS similarity**; tick **`TS_PARITY_REMAINING.md` §4*
 Do **not** promise “one more release → 99.9999%” for:
 
 - Byte-identical responses across **all** sites, logins, and anti-bot strategies.
-- Running arbitrary historical **TS adapters** in-process **without** Node (except `ts_legacy` stub or subprocess).
+- Running arbitrary historical **TS adapters** in-process **without** a JS engine (except QuickJS plugin scripts or **`ts_legacy`** stub / **Bun** subprocess — **not** Node).
 - **Playwright option-level** vs **CDP** API equivalence.
 - Full write paths and **every vendor OAuth device flow** without user credentials.
 - **100%** match vs TS **Electron/desktop** apps (local env + legal bounds).

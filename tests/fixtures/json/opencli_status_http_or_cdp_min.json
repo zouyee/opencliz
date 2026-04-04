@@ -1,0 +1,4 @@
+{
+  "status": "http_or_cdp",
+  "message": "Shell HTML or anti-bot; try OPENCLI_USE_BROWSER=1"
+}

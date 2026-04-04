@@ -27,7 +27,7 @@ The curl-backed `HttpClient.request` path also honors **`OPENCLI_HTTP_FOLLOW_RED
 ## API Endpoints
 
 ### GET /
-Returns daemon status and version.
+Returns daemon status and version. The **`version`** string matches **`opencliz --version`** (`src/core/version.zig`).
 
 **Response:**
 ```json
@@ -47,6 +47,19 @@ Health check endpoint.
   "status": "healthy"
 }
 ```
+
+### Path prefix **`/api`** (optional, TS-style)
+
+The same routes are also available under an **`/api`** prefix for clients that expect upstream-style paths:
+
+| Canonical | Alias |
+|-----------|--------|
+| `GET /commands` | `GET /api/commands` |
+| `GET /health` | `GET /api/health` |
+| `GET /` (root JSON) | `GET /api/` |
+| `GET|POST /execute/{site}/{command}` | same method on `/api/execute/{site}/{command}` |
+
+`GET /api` (no trailing path) returns **404**.
 
 ### GET /commands
 List all available commands.
@@ -211,6 +224,7 @@ Run: `zig build test`.
 | `/health` | GET | `{"status":"healthy"}` |
 | `/commands` | GET | `{"commands":[...]}` command list |
 | `/execute/{site}/{command}` | GET/POST/PUT/PATCH | Run command; args from query string or JSON body |
+| `/api/…` | same as above | **Alias** of the same routes (strip `/api` prefix internally) |
 
 ### Known Zig vs TS differences
 
@@ -219,15 +233,15 @@ Run: `zig build test`.
 | Request timeout | May exist | **`readHttpRequestFromStream`** uses **`request_timeout_ms`** / **`OPENCLI_DAEMON_REQUEST_TIMEOUT_MS`** during read → **408**. Optional **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS`** for execute → **504** (does not kill children; see above) |
 | WebSocket | TS may support | **Not supported** (HTTP only) |
 | Batch execute | TS may support | **Not supported** |
-| Path prefix | TS may use `/api/` | Zig uses `/` at repo root |
+| Path prefix | TS may use `/api/` | Zig supports **both** `/` (canonical) and **`/api/…`** aliases |
 | Auth | Bearer / X-Token / query | Same shape as TS |
 
 ### Items to verify against TS (if applicable)
 
 | Potential gap | Status | Note |
 |---------------|--------|------|
-| `/api/commands` vs `/commands` | ⚠️ confirm | Zig uses `/commands` |
-| `/api/execute/...` | ⚠️ confirm | Zig uses `/execute/...` |
+| `/api/commands` vs `/commands` | ✅ | **Both** supported (`/api/*` is an alias) |
+| `/api/execute/...` | ✅ | **Both** supported |
 | Auth middleware | ✅ aligned | Bearer / **`X-OpenCLI-Token`** / query; batch **62** tests bad creds + **OPTIONS** |
 | Request/response interceptors | N/A | Not a Zig concept |
 | keep-alive | ⚠️ confirm | Measure on TS if needed |

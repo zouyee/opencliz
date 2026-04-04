@@ -16,11 +16,32 @@
 
 ---
 
+## 首次运行（P0.5 / P0.4 基线）
+
+在**仓库根目录**、**能访问公网**的机器上执行（输出在 **`parity-output/`**，已被 **`.gitignore`**，勿提交；把摘要写进下方 **Baseline log** 即可）。
+
+**依赖**：`jq`；上游侧默认 **`bunx`**（需安装 [Bun](https://bun.sh)），或 `export OPENCLI_UPSTREAM_CLI_RUNNER=npx` 用 Node/npm。
+
+```bash
+zig build
+export OPENCLI_CACHE=0
+./scripts/parity_p0_5_export_zig.sh
+./scripts/parity_p0_5_export_upstream.sh   # 首次会拉取 @jackwener/opencli
+./scripts/parity_p0_5_diff.sh || true      # 有差异时 exit 1，属正常，人工看 diff
+```
+
+可选固定上游版本：`JACKWENER_OPENCLI_PKG='@jackwener/opencli@x.y.z'` 再跑 **`parity_p0_5_export_upstream.sh`**。  
+把 **`bun pm ls @jackwener/opencli`** 或 **`npm view @jackwener/opencli version`** 与 **diff 结论**记入 **Baseline log** 即闭合 P0.4 的「有记录」部分。
+
+若 **`v2ex/hot`** 在你当前网络一直卡住，可**三边一致**地跳过（少一条 diff）：`export PARITY_SKIP_V2EX=1` 后再跑上述三个脚本；**Baseline log** 里注明「跳过 v2ex_hot」即可。
+
+---
+
 ## P0 — L2: public API shape and JSON drift control
 
 | # | Task | Status | Deliverable / notes |
 |---|------|--------|---------------------|
-| P0.1 | Fixtures + `fixture_json_test` for high-traffic responses | ✅ | `tests/fixtures/json/` + **`src/tests/fixture_json_test.zig`** |
+| P0.1 | Fixtures + `fixture_json_test` for high-traffic responses | ✅ | `tests/fixtures/json/`（**31** 个 JSON，含 **`status`** + HN/V2EX 列表）+ **`src/tests/fixture_json_test.zig`** · batch **67** |
 | P0.2 | Side-by-side diff tooling | ✅ | **`scripts/l2_p0_routine.sh`**, **`compare_command_json.sh --diff-ts`**, batch **61** |
 | P0.3 | Manual CI entry | ✅ | **`.github/workflows/l2-json-parity-dispatch.yml`** |
 | P0.4 | Record upstream JSON baseline (versioned) | 🔄 | **`scripts/record_jackwener_baseline.sh`**; fill **Baseline log** below with **npm version / commit** (needs network; after **P0.5** export, record real **`JACKWENER_OPENCLI_PKG`**) |
@@ -78,7 +99,7 @@
 
 1. **P0.4**: On a networked machine run **`parity_p0_5_export_upstream.sh`** (or **`record_jackwener_baseline.sh`** alone); fill **Baseline log** with version/commit and deltas.  
 2. **P0.5 regression**: Before releases or major upstream bumps run **`parity_p0_5_export_zig.sh`** → **`parity_p0_5_export_upstream.sh`** → **`parity_p0_5_diff.sh`** (optionally pin **`JACKWENER_OPENCLI_PKG`**).  
-3. **P3.2**: Article export acceptance → **`MARKDOWN_ARTICLE_PIPELINE.md`** H.4; Turndown/Node wrappers remain user-supplied CLIs.  
+3. **P3.2**: Article export acceptance → **`MARKDOWN_ARTICLE_PIPELINE.md`** H.4; Turndown-style wrappers remain **user-supplied** CLIs (e.g. **Bun** or shell; **no Node** required by opencliz).  
 4. **Upstream-only features** (extension bridge, default daemon port, full `operate`, sysexits): track only after **`UPSTREAM_REFERENCE.md`** + **`TS_PARITY_99_CAP.md`** review—avoid forcing 1:1 with current Zig architecture.
 
 ---

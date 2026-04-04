@@ -5,6 +5,8 @@
 
 **Dimensions:** build time · artifact size · cold start · memory · dependency surface
 
+**opencliz runtime (this repo):** the **Zig** binary does **not** invoke **Node.js**. Plugins use embedded **QuickJS**; legacy **`type: ts`** may run under optional **Bun** (`OPENCLI_ENABLE_BUN_SUBPROCESS=1`). The **Node/npm** column in the tables below describes a **typical upstream `opencli`** install, not opencliz internals — see **`docs/RUNTIME_MODEL.md`**.
+
 ---
 
 ## 1. Headline metrics
@@ -18,7 +20,7 @@
 | **RSS (HTTP command)** | Higher (buffers, TLS, JSON) | **~5–10 MB** typical for one-shot API call | Still far below Node baseline |
 | **Debug iteration** | `npm install` + `tsc` often **15–45 s** first/full cycle | **`zig build`** often **sub-second** after cache warm | **Large win** |
 | **Release build** | **~30–70 s** typical CI path | **`zig build -Doptimize=ReleaseFast`** **~10–30 s** (machine-dependent) | **Several× faster** |
-| **Runtime deps** | **100+** npm packages + Node | **No `node_modules`**; Zig **stdlib** + **`build.zig.zon`** deps (e.g. **QuickJS-ng**), static link | **No Node/npm in production** |
+| **Runtime deps** | **100+** npm packages + Node (upstream-style) | **No `node_modules`**; Zig **stdlib** + **`build.zig.zon`** deps (e.g. **QuickJS-ng**), static link; optional **Bun** only for `ts_legacy` | **No Node in opencliz** |
 
 ---
 
@@ -118,7 +120,7 @@ Large CLIs often pull:
 
 ### 5.2 This Zig port
 
-- **No** npm / Node at runtime.  
+- **No** npm / **Node** inside **opencliz**; optional **Bun** for `ts_legacy` only (**`RUNTIME_MODEL.md`**).  
 - **Zig standard library** for most logic.  
 - **`build.zig.zon`**: e.g. **QuickJS-ng** for plugin JS; **libcurl** (or system curl) for HTTP—**linked into the binary**, not shipped as separate package manager tree.  
 - Operational complexity shifts from **semver of 100 packages** to **Zig version + C toolchain** for native deps.
@@ -174,7 +176,7 @@ Image size is dominated by **Alpine + libc + binary**—often **tens of MB**, no
 | Area | Benefit |
 |------|---------|
 | **Dev loop** | Much faster compile/test cycles vs full Node+tsc pipeline |
-| **Operations** | Tiny binary, low RSS, no Node on servers for the CLI |
+| **Operations** | Tiny binary, low RSS, **no Node** on servers for **opencliz** (optional Bun only if you enable `ts_legacy`) |
 | **Supply chain** | No runtime npm tree; audit **Zig + native deps** instead |
 | **Edge / CI** | Faster cold starts for wrappers and automation |
 

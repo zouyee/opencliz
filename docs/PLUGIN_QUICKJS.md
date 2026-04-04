@@ -1,5 +1,7 @@
 # Plugin QuickJS runtime (phase F)
 
+> **Runtime policy:** **opencliz** does **not** call **Node.js**. Legacy **`type: ts`** adapters run as **`bun <modulePath>`** when **`OPENCLI_ENABLE_BUN_SUBPROCESS=1`** (**`RUNTIME_MODEL.md`**). QuickJS covers **`plugin.yaml`** scripts.
+
 **opencliz** (Zig) embeds **QuickJS-ng** via **[mitchellh/zig-quickjs-ng](https://github.com/mitchellh/zig-quickjs-ng)**, matching the `quickjs_ng` package in `build.zig` / `build.zig.zon`.
 
 ## `plugin.yaml` fields
@@ -87,41 +89,45 @@ Scripts may have side effects (**`opencli.log`**, global state); further alignme
 
 TS may run full adapter logic in Node; QuickJS here is for **lightweight script hooks**, not a replacement for legacy `type: ts` manifest entries (those default to `ts_adapter_not_supported` stub—see migration plan phase B).
 
-## Optional: Node subprocess for `type: ts` (Wave 3.3)
+## Optional: **Bun** subprocess for `type: ts` (Wave 3.3)
 
-To run legacy `type: ts` adapters:
+Legacy `type: ts` adapters are executed with **`bun`** only — **Node is not invoked** by opencliz.
+
+To enable:
 
 ```bash
-OPENCLI_ENABLE_NODE_SUBPROCESS=1
+OPENCLI_ENABLE_BUN_SUBPROCESS=1
 ```
 
 **Behavior**:
 
-1. When `OPENCLI_ENABLE_NODE_SUBPROCESS=1`, Zig detects `source=ts_legacy` and may run `node <modulePath> <args>`
-2. Node receives the same argv as the Zig CLI
-3. Adapter prints result JSON to stdout
-4. Zig parses stdout JSON and returns it
+1. When `OPENCLI_ENABLE_BUN_SUBPROCESS=1`, Zig detects `source=ts_legacy` and runs `bun <modulePath> <args>` (Bun runs `.ts` / `.js` directly).
+2. The child receives the same argv tail as the Zig CLI would pass to the module.
+3. The adapter must print result JSON to **stdout**.
+4. Zig parses stdout JSON and returns it.
 
 **Requirements**:
 
-- `node` on `PATH`
-- `modulePath` correct in `cli-manifest.json`
+- **`bun`** on `PATH` ([Bun](https://bun.sh))
+- `modulePath` correct in `cli-manifest.json` (paths must work with Bun’s module resolution for that entrypoint)
 
 **Env (H.3 / Wave 3.3)**:
 
 ```bash
-OPENCLI_NODE_SUBPROCESS_TIMEOUT_MS=120000
-OPENCLI_NODE_MAX_OUTPUT_BYTES=10485760
+OPENCLI_BUN_SUBPROCESS_TIMEOUT_MS=120000
+OPENCLI_BUN_MAX_OUTPUT_BYTES=10485760
 ```
+
+**Breaking change (from Node)**: `OPENCLI_ENABLE_NODE_SUBPROCESS`, `OPENCLI_NODE_SUBPROCESS_TIMEOUT_MS`, and `OPENCLI_NODE_MAX_OUTPUT_BYTES` are **removed** — use the **`OPENCLI_*BUN*`** names above. Non-zero exit status is reported as **`bun_error`** (formerly `node_error`).
 
 **Errors**:
 
-- Missing/failed node → fall back to `ts_adapter_not_supported` stub
-- Non-zero exit → `{ status: "node_error", exit_code: N, stderr: "..." }`
+- Missing/failed **bun** → fall back to `ts_adapter_not_supported` stub
+- Non-zero exit → `{ status: "bun_error", exit_code: N, stderr: "..." }`
 - Bad JSON → `{ status: "parse_error", raw_output: "..." }`
-- Timeout may **SIGKILL** child; see `OPENCLI_NODE_SUBPROCESS_TIMEOUT_MS`
+- Timeout may **SIGKILL** child; see `OPENCLI_BUN_SUBPROCESS_TIMEOUT_MS`
 
-**When to use**: compliance needing TS adapters; gradual migration off stubs.
+**When to use**: run upstream-style TS/JS entrypoints without embedding Node; gradual migration off stubs.
 
 ---
 

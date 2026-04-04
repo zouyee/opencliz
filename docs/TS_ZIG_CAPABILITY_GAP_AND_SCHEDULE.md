@@ -18,9 +18,9 @@
 | **Login / OAuth** | Multi-site OAuth, device flows | Cookie/header injection + `status` | **No** full in-process OAuth |
 | **HTML→MD** | Turndown, etc. | External script first + built-in simplifier (batch **60**: common inline + block flow) | Not Turndown rule-by-rule |
 | **Images / media** | article-download pipeline | Limited switches + absolute URL download | Not legacy full media pipe |
-| **Plugins** | Node ecosystem, `type: ts` often runnable | QuickJS + `script`; `ts_legacy` stub by default; **optional** Node subprocess; **`opencli.http`** (`OPENCLI_PLUGIN_HTTP=1` + allowlist, **`PLUGIN_QUICKJS.md`**) | No in-process TS; no full Node builtins |
+| **Plugins** | Node ecosystem, `type: ts` often runnable | QuickJS + `script`; `ts_legacy` stub by default; **optional Bun** subprocess (**not** Node); **`opencli.http`** (`OPENCLI_PLUGIN_HTTP=1` + allowlist, **`PLUGIN_QUICKJS.md`**) | No in-process TS; no full Node builtins in opencliz |
 | **Daemon** | (if present) full API surface | `serve` + REST subset + tests; **read timeout** (batch **54**) + optional **`/execute` timeout** (batch **55** / **`OPENCLI_DAEMON_EXECUTE_TIMEOUT_MS`**) | WebSocket / batch may be missing; compare TS |
-| **AI explore / generate** | Deeper explore/generate | Heuristic HTML + YAML synthesize golden | Heuristics/model chain may differ |
+| **AI explore / generate** | Deeper explore/generate / `operate` | **`--explore` / `--generate` / `synthesize`**: heuristic scaffolding → **`adapter.yaml`** (**`CURRENT_CAPABILITIES` §2.9**); **no** bundled LLM | **`operate`-class** and full upstream model chain **not** replicated; golden tests bound heuristics |
 | **Desktop / Electron** | CDP to app | `desktop_exec` + `OPENCLI_CDP_ENDPOINT` | Local env; hard to match TS 100% |
 
 ---
@@ -62,7 +62,7 @@
 
 | Point | TS | Zig | Note |
 |-------|----|-----|------|
-| `type: ts` in-process | Yes | **Optional** → `ts_legacy` stub + `OPENCLI_ENABLE_NODE_SUBPROCESS=1` | Subprocess path exists |
+| `type: ts` in-process | Yes | **Optional** → `ts_legacy` stub + `OPENCLI_ENABLE_BUN_SUBPROCESS=1` (Bun; not Node) | Subprocess path exists |
 | Node builtins (fs, http, …) | Yes | **No** | QuickJS = `opencli` subset only |
 | `opencli` HTTP bridge | Implicit in Node | **`opencli.http`** GET/POST/HEAD + **`error`/`http_error`** (batch **63**, API **0.2.3**) | Not `fetch` superset |
 
@@ -71,8 +71,8 @@
 | Point | TS | Zig | Note |
 |-------|----|-----|------|
 | Full daemon API | Depends on TS version | Subset + `DAEMON_API.md`; read timeout + execute timeout; batch **62** tests; unknown **404** (batch **65**) | WebSocket / batch may lack |
-| Explore depth | May be deeper | Heuristic + `exploreFromHtml` tests | Not feature-by-feature |
-| generate full chain | TS | Zig has Generator | Compare per URL/site |
+| Explore / generate / synthesize | May be deeper + optional AI surfaces | **`--explore` / `--generate` / `synthesize`** → **`adapter.yaml`**; heuristic + golden tests (**`CURRENT_CAPABILITIES` §2.9**) | **No** bundled LLM; **`operate`-class** not replicated |
+| generate full chain | TS | Zig **`Generator`** in **`ai/explore.zig`** | Compare per URL/site |
 
 ---
 
@@ -104,7 +104,7 @@
 |---|-------------|------------|
 | 3.1 | Zig + Chrome **minimal** CI (1–2 matrix scenarios) | **`zig-chrome-ci.yml`**: `web/read` + **`zhihu/download`** (`|| true`) |
 | 3.2 | QuickJS **`opencli.http`** + allowlist + timeout | **`quickjs_runtime.zig`** **`__opencli_http_*`** + offline tests |
-| 3.3 | **Harden** Node subprocess: timeout/error mapping/argv vs TS | **`runner.zig`** + **`PLUGIN_QUICKJS.md`** |
+| 3.3 | **Harden** Bun subprocess (`ts_legacy`): timeout/error mapping/argv vs TS | **`runner.zig`** + **`PLUGIN_QUICKJS.md`** |
 
 **Aim**: L6 closer to TS plugins; L3 has CI signal.
 
@@ -128,6 +128,7 @@ Full-site OAuth, credentialed writes everywhere, Playwright↔CDP API parity, fu
 
 | Doc | Role |
 |-----|------|
+| **`CAPABILITY_MIGRATION_MAP.md`** | **L0–L7 migration diagram** + status table + exclusions |
 | This file | **TS vs Zig gap + wave schedule** |
 | `TS_PARITY_REMAINING.md` | L2–L7 narrative + backlog + **§4 sign-off snapshot** + empty template |
 | `TS_PARITY_99_CAP.md` | “~99.99%” achievable cap logic |

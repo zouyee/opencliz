@@ -1,6 +1,7 @@
 //! L7：Daemon HTTP 路由与 JSON 形状契约（对齐 docs/DAEMON_API.md；无监听、无网络）。
 const std = @import("std");
 const types = @import("../core/types.zig");
+const version_mod = @import("../core/version.zig");
 const daemon = @import("../daemon/daemon.zig");
 const cli_runner = @import("../cli/runner.zig");
 
@@ -42,7 +43,7 @@ test "daemon GET / matches DAEMON_API root shape" {
     defer parsed.deinit();
     try std.testing.expect(parsed.value == .object);
     try expectJsonString(parsed.value.object, "name", "opencliz daemon");
-    try expectJsonString(parsed.value.object, "version", "v0.0.1");
+    try expectJsonString(parsed.value.object, "version", version_mod.VERSION);
     try expectJsonString(parsed.value.object, "status", "running");
 }
 
@@ -87,6 +88,67 @@ test "daemon GET /commands returns commands array" {
     const cmds = parsed.value.object.get("commands") orelse return error.TestUnexpectedResult;
     try std.testing.expect(cmds == .array);
     try std.testing.expectEqual(@as(usize, 0), cmds.array.items.len);
+}
+
+test "daemon GET /api/commands aliases /commands" {
+    const allocator = std.testing.allocator;
+    var reg = types.Registry.init(allocator);
+    defer reg.deinit();
+
+    var dcfg = daemon.DaemonConfig{};
+    var handler = daemon.RequestHandler.init(allocator, &reg, null, &dcfg);
+    var res = try handler.handle(.{
+        .method = "GET",
+        .path = "/api/commands",
+        .query = null,
+        .body = null,
+    });
+    defer daemon.freeResponseBody(allocator, &res);
+    try std.testing.expectEqual(@as(u16, 200), res.status);
+
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, res.body, .{});
+    defer parsed.deinit();
+    const cmds = parsed.value.object.get("commands") orelse return error.TestUnexpectedResult;
+    try std.testing.expect(cmds == .array);
+}
+
+test "daemon GET /api/ aliases root JSON" {
+    const allocator = std.testing.allocator;
+    var reg = types.Registry.init(allocator);
+    defer reg.deinit();
+
+    var dcfg = daemon.DaemonConfig{};
+    var handler = daemon.RequestHandler.init(allocator, &reg, null, &dcfg);
+    var res = try handler.handle(.{
+        .method = "GET",
+        .path = "/api/",
+        .query = null,
+        .body = null,
+    });
+    defer daemon.freeResponseBody(allocator, &res);
+    try std.testing.expectEqual(@as(u16, 200), res.status);
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, res.body, .{});
+    defer parsed.deinit();
+    try expectJsonString(parsed.value.object, "name", "opencliz daemon");
+    try expectJsonString(parsed.value.object, "version", version_mod.VERSION);
+    try expectJsonString(parsed.value.object, "status", "running");
+}
+
+test "daemon GET /api alone is 404" {
+    const allocator = std.testing.allocator;
+    var reg = types.Registry.init(allocator);
+    defer reg.deinit();
+
+    var dcfg = daemon.DaemonConfig{};
+    var handler = daemon.RequestHandler.init(allocator, &reg, null, &dcfg);
+    var res = try handler.handle(.{
+        .method = "GET",
+        .path = "/api",
+        .query = null,
+        .body = null,
+    });
+    defer daemon.freeResponseBody(allocator, &res);
+    try std.testing.expectEqual(@as(u16, 404), res.status);
 }
 
 test "daemon GET /commands includes registered command fields" {
@@ -151,6 +213,26 @@ test "daemon GET /execute unknown command without runner returns 404" {
     var res = try handler.handle(.{
         .method = "GET",
         .path = "/execute/nope/cmd",
+        .query = null,
+        .body = null,
+    });
+    defer daemon.freeResponseBody(allocator, &res);
+    try std.testing.expectEqual(@as(u16, 404), res.status);
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, res.body, .{});
+    defer parsed.deinit();
+    try expectJsonString(parsed.value.object, "error", "Command not found");
+}
+
+test "daemon GET /api/execute unknown command without runner returns 404" {
+    const allocator = std.testing.allocator;
+    var reg = types.Registry.init(allocator);
+    defer reg.deinit();
+
+    var dcfg = daemon.DaemonConfig{};
+    var handler = daemon.RequestHandler.init(allocator, &reg, null, &dcfg);
+    var res = try handler.handle(.{
+        .method = "GET",
+        .path = "/api/execute/nope/cmd",
         .query = null,
         .body = null,
     });

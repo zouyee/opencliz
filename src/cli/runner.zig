@@ -7,42 +7,42 @@ const VERSION = @import("../core/version.zig").VERSION;
 
 const OpenCliError = errors.OpenCliError;
 
-/// Node 子进程最长存活（毫秒）。`0` 表示不启用超时杀死（POSIX；Windows 未接 SIGKILL 线程）。
-fn nodeSubprocessTimeoutMs() u32 {
-    const e = std.process.getEnvVarOwned(std.heap.page_allocator, "OPENCLI_NODE_SUBPROCESS_TIMEOUT_MS") catch return 120_000;
+/// Bun 子进程最长存活（毫秒）。`0` 表示不启用超时杀死（POSIX；Windows 未接 SIGKILL 线程）。
+fn bunSubprocessTimeoutMs() u32 {
+    const e = std.process.getEnvVarOwned(std.heap.page_allocator, "OPENCLI_BUN_SUBPROCESS_TIMEOUT_MS") catch return 120_000;
     defer std.heap.page_allocator.free(e);
     if (e.len == 0) return 120_000;
     return std.fmt.parseInt(u32, e, 10) catch 120_000;
 }
 
-fn nodeSubprocessMaxOutputBytes() usize {
-    const e = std.process.getEnvVarOwned(std.heap.page_allocator, "OPENCLI_NODE_MAX_OUTPUT_BYTES") catch return 10 * 1024 * 1024;
+fn bunSubprocessMaxOutputBytes() usize {
+    const e = std.process.getEnvVarOwned(std.heap.page_allocator, "OPENCLI_BUN_MAX_OUTPUT_BYTES") catch return 10 * 1024 * 1024;
     defer std.heap.page_allocator.free(e);
     if (e.len == 0) return 10 * 1024 * 1024;
     return std.fmt.parseInt(usize, e, 10) catch 10 * 1024 * 1024;
 }
 
-const NodeKillDelayArgs = struct { pid: std.process.Child.Id, ms: u32 };
+const BunKillDelayArgs = struct { pid: std.process.Child.Id, ms: u32 };
 
-fn spawnNodeTimeoutKiller(child: *std.process.Child, delay_ms: u32) void {
+fn spawnBunTimeoutKiller(child: *std.process.Child, delay_ms: u32) void {
     if (delay_ms == 0) return;
     if (builtin.os.tag == .windows) return;
     const pid = child.id;
-    const t = std.Thread.spawn(.{}, nodeKillAfterDelay, .{NodeKillDelayArgs{ .pid = pid, .ms = delay_ms }}) catch return;
+    const t = std.Thread.spawn(.{}, bunKillAfterDelay, .{BunKillDelayArgs{ .pid = pid, .ms = delay_ms }}) catch return;
     t.detach();
 }
 
-fn nodeKillAfterDelay(args: NodeKillDelayArgs) void {
+fn bunKillAfterDelay(args: BunKillDelayArgs) void {
     std.Thread.sleep(@as(u64, args.ms) * std.time.ns_per_ms);
     std.posix.kill(args.pid, std.posix.SIG.KILL) catch {};
 }
 
-/// `cli-manifest.json` 中 `type: ts` 条目：Zig 版默认不执行 Node 适配器，返回结构化说明。
-/// 若设置 `OPENCLI_ENABLE_NODE_SUBPROCESS=1` 且 node 可用，则通过 Node 子进程执行。
+/// `cli-manifest.json` 中 `type: ts` 条目：Zig 版默认不执行 TS 适配器，返回结构化说明。
+/// 若设置 `OPENCLI_ENABLE_BUN_SUBPROCESS=1` 且 **bun** 在 PATH 中可用，则通过 **Bun** 子进程执行（不再使用 Node）。
 fn tsLegacyStubResponse(allocator: std.mem.Allocator, cmd: types.Command) !std.json.Value {
     var m = std.json.ObjectMap.init(allocator);
     try m.put(try allocator.dupe(u8, "status"), .{ .string = try allocator.dupe(u8, "ts_adapter_not_supported") });
-    try m.put(try allocator.dupe(u8, "message"), .{ .string = try allocator.dupe(u8, "TypeScript/legacy OpenCLI adapters are not executed in this Zig build. Use built-in Zig adapters or YAML pipelines. See docs/TS_PARITY_MIGRATION_PLAN.md.") });
+    try m.put(try allocator.dupe(u8, "message"), .{ .string = try allocator.dupe(u8, "TypeScript/legacy OpenCLI adapters are not executed in this Zig build unless OPENCLI_ENABLE_BUN_SUBPROCESS=1 (Bun on PATH). Otherwise use built-in Zig adapters or YAML pipelines. See docs/PLUGIN_QUICKJS.md and docs/TS_PARITY_MIGRATION_PLAN.md.") });
     if (cmd.module_path) |mp| {
         try m.put(try allocator.dupe(u8, "modulePath"), .{ .string = try allocator.dupe(u8, mp) });
     }
@@ -380,11 +380,11 @@ pub const CliRunner = struct {
         return std.json.Value{ .object = result_obj };
     }
 
-    /// 检查 node 是否在 PATH 中可用
-    fn nodeAvailable(self: *CliRunner) !bool {
+    /// 检查 **bun** 是否在 PATH 中可用
+    fn bunAvailable(self: *CliRunner) !bool {
         const result = std.process.Child.run(.{
             .allocator = self.allocator,
-            .argv = &[_][]const u8{ "which", "node" },
+            .argv = &[_][]const u8{ "which", "bun" },
         }) catch return false;
         defer {
             self.allocator.free(result.stdout);
@@ -393,22 +393,19 @@ pub const CliRunner = struct {
         return result.term.Exited == 0;
     }
 
-    /// 通过 Node 子进程执行 TypeScript 适配器（Wave 3.3）
-    /// 仅在 OPENCLI_ENABLE_NODE_SUBPROCESS=1 时激活
+    /// 通过 **Bun** 子进程执行 TypeScript/JavaScript 适配器（Wave 3.3；不再调用 Node）
+    /// 仅在 `OPENCLI_ENABLE_BUN_SUBPROCESS=1` 时激活
     fn executeTsLegacy(self: *CliRunner, cmd: types.Command, args: std.StringHashMap([]const u8), json_allocator: std.mem.Allocator) !std.json.Value {
-        // 检查是否启用 Node 子进程
-        const enable_node = std.process.getEnvVarOwned(self.allocator, "OPENCLI_ENABLE_NODE_SUBPROCESS") catch null;
-        defer if (enable_node) |v| self.allocator.free(v);
+        const enable_bun = std.process.getEnvVarOwned(self.allocator, "OPENCLI_ENABLE_BUN_SUBPROCESS") catch null;
+        defer if (enable_bun) |v| self.allocator.free(v);
 
-        if (enable_node == null or !std.mem.eql(u8, enable_node.?, "1")) {
-            // 未启用，返回 stub
+        if (enable_bun == null or !std.mem.eql(u8, enable_bun.?, "1")) {
             return tsLegacyStubResponse(json_allocator, cmd);
         }
 
-        // 检查 node 是否可用
-        const node_avail = self.nodeAvailable() catch false;
-        if (!node_avail) {
-            std.log.warn("OPENCLI_ENABLE_NODE_SUBPROCESS=1 but node not found in PATH", .{});
+        const bun_avail = self.bunAvailable() catch false;
+        if (!bun_avail) {
+            std.log.warn("OPENCLI_ENABLE_BUN_SUBPROCESS=1 but bun not found in PATH", .{});
             return tsLegacyStubResponse(json_allocator, cmd);
         }
 
@@ -417,7 +414,6 @@ pub const CliRunner = struct {
             return tsLegacyStubResponse(json_allocator, cmd);
         };
 
-        // 构建 node 命令行参数
         var cmd_args = std.ArrayListUnmanaged([]const u8){};
         defer {
             for (cmd_args.items) |item| {
@@ -425,7 +421,7 @@ pub const CliRunner = struct {
             }
         }
 
-        try cmd_args.append(self.allocator, try self.allocator.dupe(u8, "node"));
+        try cmd_args.append(self.allocator, try self.allocator.dupe(u8, "bun"));
         try cmd_args.append(self.allocator, try self.allocator.dupe(u8, module_path));
 
         // 添加位置参数（_）
@@ -454,9 +450,8 @@ pub const CliRunner = struct {
             }
         }
 
-        std.log.info("executeTsLegacy: spawning node with module_path={s}, args count={d}", .{ module_path, cmd_args.items.len });
+        std.log.info("executeTsLegacy: spawning bun with module_path={s}, args count={d}", .{ module_path, cmd_args.items.len });
 
-        // 执行 node 命令
         var child = std.process.Child.init(cmd_args.items, self.allocator);
         child.stdin_behavior = .Close;
         child.stdout_behavior = .Pipe;
@@ -467,8 +462,8 @@ pub const CliRunner = struct {
             _ = child.kill() catch {};
         }
 
-        const max_io = nodeSubprocessMaxOutputBytes();
-        spawnNodeTimeoutKiller(&child, nodeSubprocessTimeoutMs());
+        const max_io = bunSubprocessMaxOutputBytes();
+        spawnBunTimeoutKiller(&child, bunSubprocessTimeoutMs());
 
         // 读取 stdout
         var stdout_data: []u8 = &.{};
@@ -479,7 +474,7 @@ pub const CliRunner = struct {
             if (result) |data| {
                 stdout_data = data;
             } else |read_err| {
-                std.log.warn("Failed to read node stdout: {}", .{read_err});
+                std.log.warn("Failed to read bun stdout: {}", .{read_err});
             }
         }
 
@@ -489,24 +484,24 @@ pub const CliRunner = struct {
             if (result) |data| {
                 stderr_data = data;
             } else |read_err| {
-                std.log.warn("Failed to read node stderr: {}", .{read_err});
+                std.log.warn("Failed to read bun stderr: {}", .{read_err});
             }
         }
 
         const term = child.wait() catch |err| {
-            std.log.warn("Failed to wait for node: {}", .{err});
+            std.log.warn("Failed to wait for bun: {}", .{err});
             _ = child.kill() catch {};
             if (stdout_data.len > 0) self.allocator.free(stdout_data);
             if (stderr_data.len > 0) self.allocator.free(stderr_data);
             return tsLegacyStubResponse(json_allocator, cmd);
         };
 
-        std.log.info("executeTsLegacy: node exited with code={d}", .{term.Exited});
+        std.log.info("executeTsLegacy: bun exited with code={d}", .{term.Exited});
 
         // 检查退出码
         if (term.Exited != 0) {
             var result_obj = std.json.ObjectMap.init(json_allocator);
-            try result_obj.put(try json_allocator.dupe(u8, "status"), .{ .string = try json_allocator.dupe(u8, "node_error") });
+            try result_obj.put(try json_allocator.dupe(u8, "status"), .{ .string = try json_allocator.dupe(u8, "bun_error") });
             try result_obj.put(try json_allocator.dupe(u8, "exit_code"), .{ .integer = @as(i64, term.Exited) });
             try result_obj.put(try json_allocator.dupe(u8, "stderr"), .{ .string = try json_allocator.dupe(u8, stderr_data) });
             if (stdout_data.len > 0) {
@@ -530,7 +525,7 @@ pub const CliRunner = struct {
         }
 
         const result = std.json.parseFromSlice(std.json.Value, json_allocator, stdout_data, .{}) catch |err| {
-            std.log.warn("Failed to parse node stdout as JSON: {}", .{err});
+            std.log.warn("Failed to parse bun stdout as JSON: {}", .{err});
             var result_obj = std.json.ObjectMap.init(json_allocator);
             try result_obj.put(try json_allocator.dupe(u8, "status"), .{ .string = try json_allocator.dupe(u8, "parse_error") });
             try result_obj.put(try json_allocator.dupe(u8, "raw_output"), .{ .string = try json_allocator.dupe(u8, stdout_data) });

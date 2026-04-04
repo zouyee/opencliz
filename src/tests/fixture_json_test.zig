@@ -29,6 +29,10 @@ const npm_package_registry_meta_min = @embedFile("../../tests/fixtures/json/npm_
 const github_trending_array_min = @embedFile("../../tests/fixtures/json/github_trending_array_min.json");
 const stackoverflow_items_wrapper_min = @embedFile("../../tests/fixtures/json/stackoverflow_items_wrapper_min.json");
 const hn_firebase_top_ids_min = @embedFile("../../tests/fixtures/json/hn_firebase_top_ids_min.json");
+const opencli_status_login_required_min = @embedFile("../../tests/fixtures/json/opencli_status_login_required_min.json");
+const opencli_status_http_or_cdp_min = @embedFile("../../tests/fixtures/json/opencli_status_http_or_cdp_min.json");
+const hackernews_top_array_min = @embedFile("../../tests/fixtures/json/hackernews_top_array_min.json");
+const v2ex_hot_array_min = @embedFile("../../tests/fixtures/json/v2ex_hot_array_min.json");
 
 test "fixture hn_item_min matches hackernews field expectations" {
     const allocator = std.testing.allocator;
@@ -375,4 +379,47 @@ test "fixture hn_firebase_top_ids_min is id array" {
     try std.testing.expect(parsed.value.array.items[0] == .integer);
     try std.testing.expectEqual(@as(i64, 9128456), parsed.value.array.items[0].integer);
     try std.testing.expectEqual(@as(i64, 9128455), parsed.value.array.items[1].integer);
+}
+
+test "fixture opencli_status_login_required_min paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, opencli_status_login_required_min, .{});
+    defer parsed.deinit();
+    try std.testing.expectEqualStrings("login_required", format.getNestedValue(parsed.value, "status").string);
+    try std.testing.expectEqualStrings("Cookie or token required for this endpoint", format.getNestedValue(parsed.value, "message").string);
+}
+
+test "fixture opencli_status_http_or_cdp_min paths" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, opencli_status_http_or_cdp_min, .{});
+    defer parsed.deinit();
+    try std.testing.expectEqualStrings("http_or_cdp", format.getNestedValue(parsed.value, "status").string);
+    try std.testing.expectEqualStrings("Shell HTML or anti-bot; try OPENCLI_USE_BROWSER=1", format.getNestedValue(parsed.value, "message").string);
+}
+
+test "fixture hackernews_top_array_min matches hnTopStories output shape" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, hackernews_top_array_min, .{});
+    defer parsed.deinit();
+    try std.testing.expect(parsed.value == .array);
+    try std.testing.expectEqual(@as(usize, 2), parsed.value.array.items.len);
+    const a0 = parsed.value.array.items[0];
+    try std.testing.expectEqual(@as(i64, 111), format.getNestedValue(a0, "id").integer);
+    try std.testing.expectEqualStrings("First Story", format.getNestedValue(a0, "title").string);
+    const a1 = parsed.value.array.items[1];
+    try std.testing.expectEqual(@as(i64, 222), format.getNestedValue(a1, "id").integer);
+    try std.testing.expectEqualStrings("Second Story", format.getNestedValue(a1, "title").string);
+}
+
+test "fixture v2ex_hot_array_min matches v2ex hot API array shape" {
+    const allocator = std.testing.allocator;
+    var parsed = try std.json.parseFromSlice(std.json.Value, allocator, v2ex_hot_array_min, .{});
+    defer parsed.deinit();
+    try std.testing.expect(parsed.value == .array);
+    try std.testing.expectEqual(@as(usize, 2), parsed.value.array.items.len);
+    const t0 = parsed.value.array.items[0];
+    try std.testing.expectEqualStrings("Hot Topic A", format.getNestedValue(t0, "title").string);
+    try std.testing.expectEqualStrings("programming", format.getNestedValue(t0, "node.name").string);
+    try std.testing.expectEqualStrings("alice", format.getNestedValue(t0, "author.name").string);
+    try std.testing.expect(format.getNestedValue(t0, "replies").integer == 5);
 }

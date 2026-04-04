@@ -275,7 +275,7 @@ pub const Discovery = struct {
         try self.registry.registerCommand(cmd);
     }
 
-    /// 从manifest加载 TS 条目：不执行脚本，注册为 `ts_legacy`，运行时返回结构化说明（见 `runner.tsLegacyStubResponse`）
+    /// 从 manifest 加载 `type: ts` 条目：注册为 `ts_legacy`；默认不执行（stub）。若 `OPENCLI_ENABLE_BUN_SUBPROCESS=1` 且 bun 在 PATH，则由 `runner` 用 **Bun** 子进程执行（见 `docs/PLUGIN_QUICKJS.md`）。
     fn loadTsEntry(self: *Discovery, entry: std.json.ObjectMap, clis_dir: []const u8) !void {
         const site = entry.get("site") orelse return;
         const name = entry.get("name") orelse return;
@@ -286,7 +286,7 @@ pub const Discovery = struct {
         const cmd = types.Command{
             .site = try self.allocator.dupe(u8, site.string),
             .name = try self.allocator.dupe(u8, name.string),
-            .description = try self.allocator.dupe(u8, "TypeScript legacy adapter (not executed in Zig build)"),
+            .description = try self.allocator.dupe(u8, "TypeScript legacy adapter (stub unless OPENCLI_ENABLE_BUN_SUBPROCESS=1 + bun)"),
             .domain = try self.allocator.dupe(u8, ""),
             .module_path = full_path,
             .source = "ts_legacy",

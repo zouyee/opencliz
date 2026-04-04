@@ -50,13 +50,13 @@
 
 | Topic | Remaining | Cap / acceptance |
 |-------|-----------|------------------|
-| TS plugins / full Node API | **Present**: **`opencli.http`** (**GET** / **POST** / **HEAD**; **`error`** table + **`http_error`** batch **63**; **`opencli_plugin_api_version` 0.2.3**); **Node subprocess** timeout/output caps (**`PLUGIN_QUICKJS.md`**) | **`ts_legacy`** stub is policy; full Node API **not** a goal |
+| TS plugins / full Node API | **Present**: **`opencli.http`** (**GET** / **POST** / **HEAD**; **`error`** table + **`http_error`** batch **63**; **`opencli_plugin_api_version` 0.2.3**); **Bun** subprocess timeout/output caps for `type: ts` (**`PLUGIN_QUICKJS.md`**) | **`ts_legacy`** stub is policy; full Node API **not** a goal |
 
 ### L7 — Ops and AI
 
 | Topic | Remaining | Cap / acceptance |
 |-------|-----------|------------------|
-| Daemon, explore, generate, synthesize | **Present**: read timeout (batch **54**), optional **`/execute`** timeout (batch **55**); **`daemon_*_test`** (batch **62** + unknown command **404** batch **65**); **`DAEMON_API.md`**, **`explore_edge_min`** (batch **53**). **Ongoing**: line-by-line vs TS extra endpoints / model chains | WebSocket, batch execute → **`DAEMON_API.md`** “Zig vs TS” **N/A** |
+| Daemon, explore, generate, synthesize | **Present**: read timeout (batch **54**), optional **`/execute`** timeout (batch **55**); **`daemon_*_test`** (batch **62** + unknown command **404** batch **65**); **`DAEMON_API.md`**, **`explore_edge_min`** (batch **53**). **Explore / generate / synthesize**: **heuristic** scaffolding → **`adapter.yaml`** (**`README.md`**, **`CURRENT_CAPABILITIES` §2.9**); **no** bundled LLM; **not** **`operate`**-class parity. **Ongoing**: vs TS extra AI endpoints / model chains | WebSocket, batch execute → **`DAEMON_API.md`** “Zig vs TS” **N/A** |
 
 ---
 
@@ -78,12 +78,12 @@
 
 | Layer | Scope (sites / scenarios) | Baseline | Sign | Date | Notes |
 |-------|---------------------------|----------|------|------|-------|
-| **L2** | Fixtures + **`l2_p0_routine.sh`** / **`record_jackwener_baseline.sh`** / **`compare_command_json.sh`** (**`--diff-ts`**); **`PARITY_PROGRESS.md`**; **`fetchJson` / `hnTopStories` / pipeline `fetch` (GET)** JSON cache (**`OPENCLI_CACHE=0`**); **`OPENCLI_HTTP_*`**; **`pipeline_fetch_cache_test`** mock (batch **59**) | **`MIGRATION_GAP`** batches 50–65; **`tests/fixtures/json/`** | ZZ | 2026-04-01 | Online drift → **`status`** + batch caps |
+| **L2** | Fixtures + **`l2_p0_routine.sh`** / **`record_jackwener_baseline.sh`** / **`compare_command_json.sh`** (**`--diff-ts`**); **`PARITY_PROGRESS.md`**; **`fetchJson` / `hnTopStories` / pipeline `fetch` (GET)** JSON cache (**`OPENCLI_CACHE=0`**); **`OPENCLI_HTTP_*`**; **`pipeline_fetch_cache_test`** mock (batch **59**); **`status`** + 列表形状 fixture（batch **67**) | **`MIGRATION_GAP`** batches 50–67; **`tests/fixtures/json/`** | ZZ | 2026-04-01 | Online drift → **`status`** + batch caps |
 | **L3** | Matrix: weixin/web/zhihu/sinablog/jd + generic **N/A** | **`CDP_SCENARIO_MATRIX.md`**; **`zig-chrome-ci.yml`** (batch **63** five scenarios + weekly) | ZZ | 2026-04-01 | Playwright ↔ CDP **not** API-equivalent |
 | **L4** | Cookie injection, write-path docs, OAuth decisions, **P1 site matrix** | **`AUTH_AND_WRITE_PATH.md`** Wave 2.2 + **§ P1 matrix**; **`regression_cookie_writepath.sh`** | ZZ | 2026-04-01 | No device code; deep private API **not** promised |
 | **L5** | Article pipeline, H.4 checklist, built-in HTML→MD increment | **`MARKDOWN_ARTICLE_PIPELINE.md`** § H.4; **`html_to_md_simple`** (hr/table batch **55** + inline/block batch **60**) | ZZ | 2026-04-01 | **Not** Turndown rule-by-rule |
-| **L6** | QuickJS `script`/`js_init`, **`opencli.http`** (incl. **HEAD**, **`error`** table batch **63**), Node subprocess hardening | **`PLUGIN_QUICKJS.md`**; **`quickjs_runtime.zig`** tests | ZZ | 2026-04-01 | Full Node builtins **not** a goal |
-| **L7** | Daemon contract + TCP e2e; read/execute timeouts; explore/synthesize golden | **`DAEMON_API.md`** (incl. L7 table; unknown **404** batch **65**); **`daemon_*_test`**, **`ai_explore_golden_test`** | ZZ | 2026-04-01 | WebSocket / batch **N/A** (see DAEMON_API) |
+| **L6** | QuickJS `script`/`js_init`, **`opencli.http`** (incl. **HEAD**, **`error`** table batch **63**), Bun subprocess hardening (`ts_legacy`) | **`PLUGIN_QUICKJS.md`**; **`quickjs_runtime.zig`** tests | ZZ | 2026-04-01 | Full Node builtins **not** a goal |
+| **L7** | Daemon contract + TCP e2e; read/execute timeouts; explore/synthesize golden; root **`version`** = **`version.zig`** | **`DAEMON_API.md`** (incl. L7 table; unknown **404** batch **65**); **`daemon_*_test`**, **`ai_explore_golden_test`** | ZZ | 2026-04-01 | WebSocket / batch **N/A** (see DAEMON_API) |
 
 **Empty template** (new project or reset):
 
@@ -106,6 +106,9 @@ L3   | see CDP_SCENARIO_MATRIX |  |      |      |
 | [AUTH_AND_WRITE_PATH.md](./AUTH_AND_WRITE_PATH.md) | L4 |
 | [MARKDOWN_ARTICLE_PIPELINE.md](./MARKDOWN_ARTICLE_PIPELINE.md) | L5 |
 | [PLUGIN_QUICKJS.md](./PLUGIN_QUICKJS.md) | L6 |
+| [CAPABILITY_MIGRATION_MAP.md](./CAPABILITY_MIGRATION_MAP.md) | **L0–L7 migration diagram** + exclusions + backlog |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | **Design**: Zig + Bun + QuickJS; **no Node** in our implementation |
+| [RUNTIME_MODEL.md](./RUNTIME_MODEL.md) | Runtime detail (paths, env vars) |
 | [DAEMON_API.md](./DAEMON_API.md) | L7 |
 | [TS_PARITY_99_CAP.md](./TS_PARITY_99_CAP.md) | “~99.99%” achievable cap, remaining checks, exclusions |
 | [TS_ZIG_CAPABILITY_GAP_AND_SCHEDULE.md](./TS_ZIG_CAPABILITY_GAP_AND_SCHEDULE.md) | **TS vs Zig gap table + wave schedule** |
@@ -114,4 +117,4 @@ L3   | see CDP_SCENARIO_MATRIX |  |      |      |
 
 ---
 
-*Doc version: 2026-04-01 · Upstream baseline **`UPSTREAM_REFERENCE.md`**; progress **`PARITY_PROGRESS.md`**; plan A–G closed; L2–L7 **sign-off snapshot** §4; batches **`MIGRATION_GAP.md`** (incl. **55–65**); cap semantics **`TS_PARITY_99_CAP.md`**.*
+*Doc version: 2026-04-01 · Upstream baseline **`UPSTREAM_REFERENCE.md`**; progress **`PARITY_PROGRESS.md`**; plan A–G closed; L2–L7 **sign-off snapshot** §4; batches **`MIGRATION_GAP.md`** (incl. **55–67**); cap semantics **`TS_PARITY_99_CAP.md`**; migration view **`CAPABILITY_MIGRATION_MAP.md` §0** (~99%).*

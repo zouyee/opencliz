@@ -4,6 +4,8 @@ This document describes **what this repository (`opencliz`, Zig implementation) 
 
 For the formal upstream baseline definition, see **`UPSTREAM_REFERENCE.md`**. For migration batches and command-name statistics, see **`MIGRATION_GAP.md`**. For ongoing parity tasks, see **`PARITY_PROGRESS.md`**, **`TS_PARITY_REMAINING.md`**, and **`TS_ZIG_CAPABILITY_GAP_AND_SCHEDULE.md`**.
 
+**Architecture / 设计方案:** **`ARCHITECTURE.md`** (**Zig + Bun + QuickJS**; **our implementation does not use Node.js**). **Runtime detail:** **`RUNTIME_MODEL.md`**.
+
 ---
 
 ## 1. Product identity
@@ -11,8 +13,8 @@ For the formal upstream baseline definition, see **`UPSTREAM_REFERENCE.md`**. Fo
 | Item | **opencliz** (this repository, Zig) | **OpenCLI** upstream (TypeScript) |
 |------|------------------------|------------------------|
 | Project name | **opencliz** (binary **`opencliz`**) | **opencli** on npm / `jackwener/opencli` |
-| Language | **Zig** (single static binary) | **Node.js / TypeScript** |
-| Runtime | None required at install time | Node.js + npm dependencies |
+| Language | **Zig** (single static binary) + **Bun** (tooling / optional `ts_legacy`) + **QuickJS** (plugins) | **Node.js / TypeScript** |
+| Runtime | **Zig** executable; **no Node.js** in this implementation (**`ARCHITECTURE.md`**) | Node.js + npm dependencies |
 | Browser integration | **CDP over WebSocket** (Chrome spawned locally, or **external** endpoint e.g. Lightpanda via `OPENCLI_CDP_WEBSOCKET`) | **Browser Bridge Chrome extension** + local daemon WebSocket |
 | Primary goal | Same *vision* (“make any website your CLI”) with **fast cold start** and **low memory**; **not** byte-for-byte clone of upstream | Reference ecosystem and command surface |
 
@@ -61,6 +63,7 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 
 - **QuickJS**-hosted plugins (`plugin.yaml`, `PLUGIN_QUICKJS.md`).
 - **`opencli.http`** subset for plugins (GET/POST/HEAD, documented error shapes) — **not** the full Node plugin API from upstream.
+- Legacy **`type: ts`** manifest entries: **`ts_legacy`** stub by default; optional **`OPENCLI_ENABLE_BUN_SUBPROCESS=1`** runs the entry with **`bun`** on `PATH` — **opencliz does not invoke Node**.
 
 ### 2.7 Daemon mode
 
@@ -72,9 +75,21 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 - **`external/`** and **`external-clis.yaml`**: invoke tools like `gh`, `docker` through OpenCLI with unified formatting.
 - Behavior vs upstream “CLI Hub” / `register` flows may differ; treat as **related capability**, not a guaranteed match.
 
-### 2.9 AI discovery / exploration
+### 2.9 Explore / generate / synthesize (adapter scaffolding)
 
-- Features such as **`--explore`** / **`--generate`** (and related tests) exist in this codebase; they are **not** documented here as full parity with every upstream AI or `operate`-style browser automation surface.
+Aligned naming and intent with the **opencliz** CLI (see **`README.md`** Features):
+
+| CLI | Role |
+|-----|------|
+| **`opencliz --explore <url>`** | Fetch page; **heuristic** extraction (title, suspected API paths, storage/cookie hints) → JSON (e.g. **`--explore-out`** or stdout with **`-f json`**). |
+| **`opencliz --generate <url> --site <name>`** | Runs the explore pipeline and writes **`~/.opencli/clis/<site>/adapter.yaml`** (multi-command root supported by discovery). |
+| **`opencliz synthesize --explore <file> [--site …] [--top N]`** | Same YAML output from an existing explore JSON file. |
+| **`opencliz cascade --site …`** | Auth-strategy probing (HTTP), separate from explore but often used in the same “bootstrap an adapter” story. |
+
+**Boundaries (parity language):**
+
+- **No** bundled **LLM / chat** API for discovery — logic is **local heuristics** + tests such as **`ai_explore_golden_test`** / golden YAML (**`DAEMON_API.md`** test index).
+- **Not** full parity with every upstream **AI** or **`operate`-style** deep browser automation; treat as **scaffolding** to reduce hand-written YAML, not a product-equivalent AI operator.
 
 ---
 
@@ -88,7 +103,7 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 | **Daemon** | Integrated docs / ports as in upstream | **`opencliz serve`** REST subset — see **`DAEMON_API.md`** |
 | **Exit codes** | Some sysexits-style conventions (e.g. login required) | Often **`status` inside JSON**; exit-code parity is **not** guaranteed |
 | **`operate` / deep AI browser control** | Product features in upstream direction | **Not** replicated as a first-class equivalent |
-| **Plugins** | Node ecosystem assumptions | **QuickJS** + documented HTTP API subset |
+| **Plugins** | Node ecosystem assumptions | **QuickJS** + documented HTTP API subset; legacy **`type: ts`** via **Bun** subprocess only (**not** Node) |
 | **Performance** | Node cold start / memory | **Single small binary**, very fast startup (see `README.md` metrics — illustrative, measure on your machine) |
 
 ---
@@ -121,10 +136,13 @@ Upstream often assumes the **Browser Bridge** extension and a local daemon. **Th
 | **`advanced/cdp.md`** | Chrome remote debugging, tunnels, `OPENCLI_CDP_WEBSOCKET` |
 | **`MARKDOWN_ARTICLE_PIPELINE.md`** | Article / Markdown export |
 | **`PLUGIN_QUICKJS.md`** | QuickJS plugins |
-| **`DAEMON_API.md`** | `opencliz serve` |
+| **`DAEMON_API.md`** | `opencliz serve` (incl. **`/api/*`** aliases) |
+| **`CAPABILITY_MIGRATION_MAP.md`** | L0–L7 **能力迁移图** vs upstream |
 | **`AUTH_AND_WRITE_PATH.md`** | Cookies, OAuth/write boundaries |
 | **`TS_ZIG_CAPABILITY_GAP_AND_SCHEDULE.md`** | Scheduled gap work |
 | **`TS_PARITY_99_CAP.md`** | Theoretical parity ceiling and exclusions |
+| **`ARCHITECTURE.md`** | **Design / 设计方案**: Zig + Bun + QuickJS; **no Node** in our implementation |
+| **`RUNTIME_MODEL.md`** | Runtime detail: execution paths, env vars |
 | **`adapters/index.md`** | Per-site adapter list |
 | **`adapters/BROWSER_PREREQUISITES.md`** | Browser Bridge vs CDP for this Zig port |
 

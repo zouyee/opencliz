@@ -1,0 +1,4 @@
+# Prefer text lockfile for review + CI (--frozen-lockfile).
+# After first `bun install`, commit `bun.lock` and switch workflows to `bun install --frozen-lockfile` if desired.
+[install]
+saveTextLockfile = true

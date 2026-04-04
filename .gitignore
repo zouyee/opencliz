@@ -1,5 +1,7 @@
-# Zig（本地缓存与构建输出，勿提交）
+# Zig（本地编译缓存与构建输出，勿上传 / 勿提交）
+.zig-cache
 .zig-cache/
+**/.zig-cache/
 zig-out/
 # 仓库内全局缓存（见 build.sh 中 ZIG_GLOBAL_CACHE_DIR）
 .zig-global-cache/
@@ -31,11 +33,21 @@ docs/.vitepress/cache
 # Database files
 *.db
 
-# Migration / TS parity progress (optional local tracking; force-add with `git add -f` if you need them in the remote)
+# Migration / TS parity / upstream-diff docs（本地跟踪即可；若要进远端：`git add -f <path>`）
+DEVELOPMENT_ROADMAP.md
+EXECUTIVE_SUMMARY.md
+GANTT_CHART.md
 MIGRATION_REPORT.md
+PROGRESS_WEEK*.md
+WEEKLY_CHECKLIST.md
+.agents/workflows/cross-project-adapter-migration.md
+docs/CAPABILITY_MIGRATION_MAP.md
+docs/CURRENT_CAPABILITIES_AND_UPSTREAM_DIFF.md
+docs/MARKDOWN_ARTICLE_PIPELINE.md
 docs/MIGRATION_GAP.md
 docs/PARITY_PROGRESS.md
-docs/TS_PARITY_REMAINING.md
-docs/TS_PARITY_MIGRATION_PLAN.md
 docs/TS_PARITY_99_CAP.md
+docs/TS_PARITY_MIGRATION_PLAN.md
+docs/TS_PARITY_REMAINING.md
 docs/TS_ZIG_CAPABILITY_GAP_AND_SCHEDULE.md
+docs/UPSTREAM_REFERENCE.md

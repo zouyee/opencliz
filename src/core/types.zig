@@ -331,6 +331,12 @@ pub const Registry = struct {
             adapter.deinit();
         }
         self.adapters.deinit();
+        for (self.external_clis.items) |cli| {
+            self.allocator.free(cli.name);
+            self.allocator.free(cli.description);
+            self.allocator.free(cli.binary);
+            if (cli.install_cmd) |ic| self.allocator.free(ic);
+        }
         self.external_clis.deinit();
     }
 

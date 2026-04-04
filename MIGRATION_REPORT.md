@@ -1,6 +1,7 @@
 # OpenCLI Migration Report: TypeScript to Zig
 
 > **⚠️ Historical snapshot — not the live status page** (2026-04-01 maintenance)  
+> - **Architecture / 设计方案 (Zig · Bun · QuickJS; no Node in our implementation):** `docs/ARCHITECTURE.md` · **Runtime detail:** `docs/RUNTIME_MODEL.md`  
 > - **Current capabilities vs upstream:** `docs/CURRENT_CAPABILITIES_AND_UPSTREAM_DIFF.md`  
 > - **Parity / P0–P4 progress:** `docs/PARITY_PROGRESS.md`  
 > - **Migration plan A–G (done) & phase H:** `docs/TS_PARITY_MIGRATION_PLAN.md`  
@@ -17,9 +18,9 @@ The Zig port **delivered the scoped migration work** (command surface, HTTP/adap
 
 | Metric | TypeScript | Zig (illustrative) | Note |
 |--------|------------|--------------------|------|
-| Binary Size | ~50MB + Node.js runtime | ~3.5MB single binary | Measure locally |
-| Startup Time | ~500ms class | ~3–4ms class | Measure locally |
-| Memory Usage | ~150MB class | ~1–3MB RSS class | Measure locally |
+| Binary Size | ~50 MB + Node.js runtime | **~5–6 MB** single binary (ReleaseFast; platform-dependent) | See **`PERFORMANCE_REPORT.md`** |
+| Startup Time | ~200–500 ms class | **~3–5 ms** class | Measure locally |
+| Memory Usage | ~100–200 MB RSS class | **~1–3 MB** RSS class (tiny paths) | HTTP-heavy commands use more |
 | **Default `zig build test`** | — | **~16 tests** pass | Does **not** equal all `src/tests.zig` declarations today |
 | Build Success | ✓ | ✓ | `zig build` / `zig build test` |
 
@@ -29,7 +30,7 @@ The Zig port **delivered the scoped migration work** (command surface, HTTP/adap
 
 ### What Was Migrated
 
-1. **Broad adapter coverage** (the original report listed ~20 sites as examples; the live registry is larger — run `opencli list`)
+1. **Broad adapter coverage** (the original report listed ~20 sites as examples; the live registry is larger — run **`opencliz list`**)
    - Bilibili (hot, search, user)
    - GitHub (trending, repo)
    - HackerNews (top, show)
@@ -42,7 +43,7 @@ The Zig port **delivered the scoped migration work** (command surface, HTTP/adap
    - Zhihu (hot, search, question, user)
    - Douban (movie, book)
    - Weibo (hot, user, post)
-   - And more...
+   - And more…
 
 2. **Test infrastructure (as of original report)**
    - `src/tests/integration_tests.zig`, `adapter_test_helpers.zig`, `src/tests.zig`, fixture tests, etc.  
@@ -96,29 +97,31 @@ Many cases assumed older Zig `std.process.Child` / `HttpClient` APIs and **may n
 
 ### Binary Characteristics
 
+Aligned with **`PERFORMANCE_REPORT.md`** §1 / Appendix B (point-in-time examples; not SLAs).
+
 | Metric | Value |
 |--------|-------|
-| Binary Size | 3,690,632 bytes (~3.5 MB) |
-| Startup Time | 3-4 ms |
-| Memory (RSS) | ~2.3 MB |
+| Binary Size | **~5–6 MB** typical ReleaseFast (e.g. ~5.5 MB on one macOS arm64 snapshot) |
+| Startup Time | **~3–5 ms** (trivial CLI path) |
+| Memory (RSS) | **~1.6–2.7 MB** examples for `--version` / `list`; higher for HTTP-heavy commands |
 
 ### Runtime Performance
 
 | Operation | Time |
 |-----------|------|
-| `opencli --version` | ~50ms (including process spawn) |
-| `opencli list` | ~100ms |
-| `opencli bilibili/hot --limit 3` | ~225ms (includes API call) |
-| `opencli hackernews/top --limit 3` | ~2.9s (HN API is slow) |
+| `opencliz --version` | **<1 ms** process time (wall clock includes shell) |
+| `opencliz list` | **~1 ms** order-of-magnitude (registry parse) |
+| `opencliz bilibili/hot --limit 3` | **~100–200 ms** class (network-heavy; CDN varies) |
+| `opencliz hackernews/top --limit 3` | **~1–3 s** class (upstream API latency) |
 
 ### Comparison with TypeScript
 
-| Metric | TypeScript | Zig | Factor |
-|--------|------------|-----|--------|
-| Startup | 500ms | 3-4ms | **125x faster** |
-| Memory | 150MB | 2.3MB | **65x less** |
-| Binary | 50MB+ | 3.5MB | **14x smaller** |
-| Cold API call | ~200ms | ~50ms | **4x faster** |
+| Metric | TypeScript | Zig | Factor (order-of-magnitude) |
+|--------|------------|-----|----------------------------|
+| Startup | ~200–500 ms | ~3–5 ms | **~100× class** |
+| Memory (idle) | ~100–200 MB | ~1–3 MB | **~50–100× class** |
+| Binary | ~50 MB+ | ~5–6 MB | **~9–10× class** |
+| End-to-end API call | startup + network | network-dominated | **Startup/RAM win**; wall time often similar once HTTP dominates |
 
 ---
 

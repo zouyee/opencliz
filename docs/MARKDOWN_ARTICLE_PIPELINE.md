@@ -38,7 +38,7 @@ export OPENCLI_HTML_TO_MD_SCRIPT="$PWD/examples/html_to_md_pandoc_wrap.sh"
 # then run opencliz commands that export article/HTML
 ```
 
-(For Turndown-like rules, use a small Node **`turndown`** script with the same interface; not shipped with `node_modules` in this repo.)
+(For Turndown-like rules, use a small **`turndown`** script run by **Bun** or any CLI with the same stdin/stdout contract; not bundled in this repo.)
 
 ---
 

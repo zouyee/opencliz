@@ -37,38 +37,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # NOTE: Windows excluded — browser-actions/setup-chrome hangs during
-        # Chrome MSI installation on Windows runners (known issue).
         os: [ubuntu-latest, macos-latest]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v6
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: '22'
-          cache: 'npm'
+          bun-version: 1.2.5
+
+      - name: Cache Bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-install-${{ runner.os }}-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
+          restore-keys: |
+            bun-install-${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Setup Chrome
         uses: ./.github/actions/setup-chrome
         id: setup-chrome
 
       - name: Build
-        run: npm run build
+        run: bun run build
 
       - name: Run E2E tests (Linux, via xvfb)
         if: runner.os == 'Linux'
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
-            npx vitest run tests/e2e/ --reporter=verbose
+            bun run test:e2e
         env:
           OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
 
-      - name: Run E2E tests (macOS / Windows)
+      - name: Run E2E tests (macOS)
         if: runner.os != 'Linux'
-        run: npx vitest run tests/e2e/ --reporter=verbose
+        run: bun run test:e2e
         env:
           OPENCLI_BROWSER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}

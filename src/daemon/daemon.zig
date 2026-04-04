@@ -1,5 +1,6 @@
 const std = @import("std");
 const types = @import("../core/types.zig");
+const version_mod = @import("../core/version.zig");
 const http = @import("../http/client.zig");
 const cli_runner = @import("../cli/runner.zig");
 
@@ -327,14 +328,27 @@ pub const RequestHandler = struct {
 
         const path = request.path;
 
-        if (std.mem.eql(u8, path, "/")) {
+        // Optional `/api/*` prefix for parity with TS daemon path style (see docs/DAEMON_API.md).
+        const route_path: []const u8 = if (std.mem.startsWith(u8, path, "/api"))
+            path["/api".len..]
+        else
+            path;
+        if (std.mem.startsWith(u8, path, "/api") and route_path.len == 0) {
+            return http.Response{
+                .status = 404,
+                .body = "{\"error\": \"Not found\"}",
+                .content_type = "application/json",
+            };
+        }
+
+        if (std.mem.eql(u8, route_path, "/")) {
             return try self.handleRoot();
-        } else if (std.mem.eql(u8, path, "/health")) {
+        } else if (std.mem.eql(u8, route_path, "/health")) {
             return try self.handleHealth();
-        } else if (std.mem.eql(u8, path, "/commands")) {
+        } else if (std.mem.eql(u8, route_path, "/commands")) {
             return try self.handleCommands();
-        } else if (std.mem.startsWith(u8, path, "/execute/")) {
-            const command_path = path[9..];
+        } else if (std.mem.startsWith(u8, route_path, "/execute/")) {
+            const command_path = route_path["/execute/".len..];
             return try self.handleExecute(command_path, request);
         } else {
             return http.Response{
@@ -346,11 +360,16 @@ pub const RequestHandler = struct {
     }
 
     fn handleRoot(self: *RequestHandler) !http.Response {
-        _ = self;
+        const body = try std.fmt.allocPrint(
+            self.allocator,
+            "{{\"name\": \"opencliz daemon\", \"version\": \"{s}\", \"status\": \"running\"}}",
+            .{version_mod.VERSION},
+        );
         return http.Response{
             .status = 200,
-            .body = "{\"name\": \"opencliz daemon\", \"version\": \"v0.0.1\", \"status\": \"running\"}",
+            .body = body,
             .content_type = "application/json",
+            .body_owned = true,
         };
     }
 

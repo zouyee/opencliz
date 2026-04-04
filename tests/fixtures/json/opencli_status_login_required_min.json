@@ -1,0 +1,4 @@
+{
+  "status": "login_required",
+  "message": "Cookie or token required for this endpoint"
+}

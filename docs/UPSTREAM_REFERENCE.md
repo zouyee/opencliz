@@ -12,6 +12,8 @@ Unless stated otherwise, **“upstream”**, **“TS OpenCLI”**, or **“origi
 
 **Full picture of current Zig capabilities and differences**: **`CURRENT_CAPABILITIES_AND_UPSTREAM_DIFF.md`**.
 
+**How this repository is implemented** (**Zig + Bun + QuickJS**; **no Node.js**): **`ARCHITECTURE.md`** · **Runtime detail:** **`RUNTIME_MODEL.md`**.
+
 ---
 
 ## How this repo tracks parity with upstream

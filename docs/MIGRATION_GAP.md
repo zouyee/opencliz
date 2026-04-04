@@ -371,6 +371,18 @@
 - **Script**: **`h_l2_ts_diff_suggestions.sh`** — suggested commands to diff Zig vs TS **`opencli … -f json`** (needs network; use with **`compare_command_json.sh`**).
 - **Plan**: **`TS_PARITY_MIGRATION_PLAN.md` §6.2** wave **H.1**.
 
+## Delivered (batch 68 — Registry: free `ExternalCli` strings; P0.5 optional `PARITY_SKIP_V2EX`)
+
+- **`types.zig` / `Registry.deinit`**: 释放 **`external_clis`** 中 **`name`/`description`/`binary`/`install_cmd`**，消除 Debug **GPA** 泄漏（**`loadExternalClis`** 路径）。
+- **Scripts**: **`parity_p0_5_export_zig.sh`** / **`parity_p0_5_export_upstream.sh`** / **`parity_p0_5_diff.sh`** 支持 **`PARITY_SKIP_V2EX=1`**（**`v2ex/hot`** 网络卡住时三边一致跳过）。
+- **`PARITY_PROGRESS.md`**: **「首次运行」** 中文步骤 + 跳过 **v2ex** 说明。
+
+## Delivered (batch 67 — L2: structured `status` + list fixtures for parity map ~99%)
+
+- **L2 / `tests/fixtures/json/`**: **`opencli_status_login_required_min.json`**, **`opencli_status_http_or_cdp_min.json`**（对齐 **`http_exec`** 常见 **`status`**）；**`hackernews_top_array_min.json`**（**`hnTopStories`** 顶层数组）；**`v2ex_hot_array_min.json`**（**`/api/topics/hot.json`** 数组）。
+- **`fixture_json_test.zig`**: 上述四文件 **`@embedFile`** + **`getNestedValue`** 断言。
+- **Docs**: **`CAPABILITY_MIGRATION_MAP.md`** — **§0** 可核对 **~99%** 口径（加权表 + 余量 **P0.4**）；L2/L7 行刷新。
+
 ## Delivered (batch 66 — L2 P0.5 / L5 P3.2: five-command export + HTML→MD wrapper)
 
 - **L2 / P0.5**: **`parity_p0_5_export_zig.sh`** (**`OPENCLI_CACHE=0`**, **`parity-output/zig/*.json`**), **`parity_p0_5_export_upstream.sh`** (batch **`record_jackwener_baseline.sh`**), **`parity_p0_5_diff.sh`** (**`diff -u`**); **`.gitignore`** **`parity-output/`**.
@@ -381,7 +393,7 @@
 
 - **`daemon.zig`**: **`/execute/{site}/{cmd}`** not in registry → **404** + **`{"error":"Command not found"}`** (with/without runner, with/without execute timeout); other failures still **500**.
 - **`daemon_contract_test.zig`**: unknown → **404**; known command without runner → **503**; “no runner + unknown” → **404**.
-- **`record_jackwener_baseline.sh`**: upstream **`npx @jackwener/opencli … -f json | jq -S`** to disk for **`compare_command_json.sh --diff-ts`**; optional **`JACKWENER_OPENCLI_PKG`** pin.
+- **`record_jackwener_baseline.sh`**: upstream CLI via **`bunx @jackwener/opencli … -f json | jq -S`** by default; override with **`OPENCLI_UPSTREAM_CLI_RUNNER=npx`** if needed — used for **`compare_command_json.sh --diff-ts`**; optional **`JACKWENER_OPENCLI_PKG`** pin.
 - **`PARITY_PROGRESS.md`**: P0–P4 status, baseline table, ordered next steps.
 - **`DAEMON_API.md`**: “items to verify” row for unknown commands.
 - **`l2_p0_routine.sh`**: mentions **`record_jackwener_baseline.sh`** and **`PARITY_PROGRESS.md`**.
@@ -474,7 +486,7 @@
 - **H.2 / wave 2**: **`CDP_SCENARIO_MATRIX.md`** ↔ **`zig-chrome-ci.yml`** (matrix signed); **`AUTH_AND_WRITE_PATH.md`** OAuth/device Wave 2.2 **ZZ**; **`regression_cookie_writepath.sh`** lists Cookie write commands (details in **`AUTH_AND_WRITE_PATH.md`**).
 - **H.3 / wave 3**: **`zig-chrome-ci.yml`** second scenario **`zhihu/download`** smoke (**`|| true`**, anti-bot); **`paths`** include **`quickjs_runtime.zig`**, **`runner.zig`**.
 - **QuickJS HTTP bridge (3.2)**: **`__opencli_http_*`** natives in **`quickjs_runtime.zig`**; **`opencli_plugin_api_version` → 0.2.1**; tests **`httpGetSync`/`httpPostSync`** whitelist + https reject (no network).
-- **Node subprocess hardening (3.3)**: **`runner.zig`** — **`OPENCLI_NODE_SUBPROCESS_TIMEOUT_MS`** (default 120s, **`0`** off), **`OPENCLI_NODE_MAX_OUTPUT_BYTES`**; POSIX timeout **detach** + **`SIGKILL`**; **`errdefer child.kill`**; **`PLUGIN_QUICKJS.md`** updated.
+- **Bun subprocess hardening (3.3)**: **`runner.zig`** — **`OPENCLI_BUN_SUBPROCESS_TIMEOUT_MS`** (default 120s, **`0`** off), **`OPENCLI_BUN_MAX_OUTPUT_BYTES`**; POSIX timeout **detach** + **`SIGKILL`**; **`errdefer child.kill`**; **`PLUGIN_QUICKJS.md`** updated (**Bun** replaces Node for `type: ts`).
 
 ## Delivered (batch 51 — H.1: L2 fixtures + Reddit hot shape)
 
@@ -495,7 +507,7 @@
 - **`discovery.loadYamlFile`**: root **`commands:`** as **object** or **array** expands commands; children inherit **`site`/`domain`/`strategy`/`browser`/`description`** (child wins). Example **`examples/bilibili.yaml`** → `~/.opencli/clis/<site>/` or `src/clis/<site>/`.
 - **`commandFromYamlObject`**: shared parse/inherit for single command body.
 - **`cli-manifest.json`**: **`type: yaml`** heap-copied fields, **`source=manifest_yaml`** (no dangling JSON buffers).
-- **`type: ts`**: **`source=ts_legacy`**, **`module_path`** owned by registry; **`runner`** returns **`ts_adapter_not_supported`** JSON (no in-process Node).
+- **`type: ts`**: **`source=ts_legacy`**, **`module_path`** owned by registry; **`runner`** returns **`ts_adapter_not_supported`** JSON unless **`OPENCLI_ENABLE_BUN_SUBPROCESS=1`** (**Bun** child — **no Node**).
 - **Plan/matrix docs**: **`TS_PARITY_MIGRATION_PLAN.md`** (B checked), **`CDP_SCENARIO_MATRIX.md`**, **`AUTH_AND_WRITE_PATH.md`**, **`MARKDOWN_ARTICLE_PIPELINE.md`**; list diff **`scripts/compare_opencli_list.sh`**.
 
 ## Delivered (batch 44 — YAML pipeline + plugin command execution)

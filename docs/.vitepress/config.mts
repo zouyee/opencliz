@@ -4,6 +4,17 @@ export default defineConfig({
   base: '/docs/',
   title: 'OpenCLI',
   description: 'Make any website or Electron App your CLI — AI-powered, account-safe, self-healing.',
+  // opencliz docs mirror upstream adapter pages; some guide paths (e.g. browser-bridge) are not vendored here.
+  ignoreDeadLinks: [/^\/guide\/browser-bridge$/],
+  // Parity / migration ledgers use `{{args.xxx}}` and `<tag>` prose that break Vue SSG; keep them in-repo but out of VitePress.
+  srcExclude: [
+    'MIGRATION_GAP.md',
+    'PARITY_PROGRESS.md',
+    'TS_PARITY_99_CAP.md',
+    'TS_PARITY_REMAINING.md',
+    'TS_PARITY_MIGRATION_PLAN.md',
+    'TS_ZIG_CAPABILITY_GAP_AND_SCHEDULE.md',
+  ],
 
   head: [
     ['meta', { property: 'og:title', content: 'OpenCLI Documentation' }],

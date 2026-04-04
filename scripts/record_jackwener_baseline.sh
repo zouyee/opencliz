@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# P0：导出上游 jackwener/opencli 的 JSON（jq -S），供与 Zig 并排 diff；需网络与 Node/npm。
+# P0：导出上游 jackwener/opencli 的 JSON（jq -S），供与 Zig 并排 diff；需网络。
+# 默认用 bunx 跑上游包（无需 Node）；若要用 npx：export OPENCLI_UPSTREAM_CLI_RUNNER=npx
 # 用法:
 #   ./scripts/record_jackwener_baseline.sh /tmp/ts-hn.json hackernews top --limit 1
 # 环境变量:
 #   JACKWENER_OPENCLI_PKG  默认 @jackwener/opencli（可 pin 版本如 @jackwener/opencli@1.6.1）
+#   OPENCLI_UPSTREAM_CLI_RUNNER  默认 bunx；设为 npx 则需 Node/npm
 #
 # 将包版本写入基线表: docs/PARITY_PROGRESS.md §「基线记录」
 set -euo pipefail
@@ -20,6 +22,7 @@ if ! command -v jq >/dev/null 2>&1; then
     exit 1
 fi
 mkdir -p "$(dirname "$OUT")"
-echo "Recording: npx -y $PKG $* -f json -> $OUT (sorted)" >&2
-npx -y "$PKG" "$@" -f json | jq -S . >"$OUT"
+RUNNER="${OPENCLI_UPSTREAM_CLI_RUNNER:-bunx}"
+echo "Recording: $RUNNER $PKG $* -f json -> $OUT (sorted)" >&2
+"$RUNNER" "$PKG" "$@" -f json | jq -S . >"$OUT"
 echo "Wrote $OUT" >&2

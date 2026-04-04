@@ -2,6 +2,7 @@
 # PARITY_PROGRESS P0.5：导出 Zig opencli 五条公开读命令的 JSON（jq -S），供与上游并排 diff。
 # 用法（仓库根）: OPENCLI_CACHE=0 ./scripts/parity_p0_5_export_zig.sh
 # 输出目录: parity-output/zig/（默认，见 .gitignore）
+# 若 v2ex/hot 在网络环境卡住: PARITY_SKIP_V2EX=1 ./scripts/parity_p0_5_export_zig.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "${0}")/.." && pwd)"
 OUT="${PARITY_OUT:-$ROOT/parity-output}/zig"
@@ -27,7 +28,11 @@ run() {
 
 run hackernews_top hackernews/top --limit 2
 run github_trending github/trending --language rust --limit 2
-run v2ex_hot v2ex/hot --limit 3
+if [[ -n "${PARITY_SKIP_V2EX:-}" ]]; then
+    echo "skip v2ex_hot (PARITY_SKIP_V2EX set)" >&2
+else
+    run v2ex_hot v2ex/hot --limit 3
+fi
 run npm_search npm/search --query express --limit 2
 run crates_search crates/search --query serde --limit 2
 

@@ -1,0 +1,20 @@
+[
+  {
+    "id": 111,
+    "title": "First Story",
+    "url": "https://example.com/1",
+    "by": "user1",
+    "time": 1000,
+    "score": 10,
+    "descendants": 2
+  },
+  {
+    "id": 222,
+    "title": "Second Story",
+    "url": "https://example.com/2",
+    "by": "user2",
+    "time": 2000,
+    "score": 20,
+    "descendants": 4
+  }
+]

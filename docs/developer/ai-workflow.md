@@ -1,6 +1,6 @@
 # AI workflow (Zig opencliz)
 
-Explore → JSON → synthesize YAML → user-dir registration; CLI flags **differ** from the upstream Node CLI—use **`opencliz --help`** in this repo.
+Explore → JSON → synthesize YAML → user-dir registration; CLI flags **differ** from upstream **`opencli`** (TS distribution)—use **`opencliz --help`** in this repo. Runtime model: **`../RUNTIME_MODEL.md`**.
 
 ## One shot: `--generate`
 

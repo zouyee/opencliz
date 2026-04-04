@@ -12,6 +12,12 @@ FAIL=0
 for name in hackernews_top github_trending v2ex_hot npm_search crates_search; do
     zf="$ZDIR/${name}.json"
     tf="$TDIR/${name}.json"
+    if [[ ! -f "$zf" || ! -f "$tf" ]]; then
+        if [[ "$name" == "v2ex_hot" && -n "${PARITY_SKIP_V2EX:-}" ]]; then
+            echo "skip diff v2ex_hot (PARITY_SKIP_V2EX)" >&2
+            continue
+        fi
+    fi
     if [[ ! -f "$zf" ]]; then
         echo "缺少 $zf（先运行 parity_p0_5_export_zig.sh）" >&2
         FAIL=1

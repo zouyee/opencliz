@@ -1,7 +1,7 @@
 .{
-    .name = .opencli,
-    .version = "2.0.0",
-    .fingerprint = 0xd62c1e9047ad8674,
+    .name = .opencliz,
+    .version = "0.0.1",
+    .fingerprint = 0x920bc8f560e68411,
     .minimum_zig_version = "0.14.0",
     .dependencies = .{
         .quickjs_ng = .{

@@ -1,0 +1,22 @@
+{
+  "name": "opencliz",
+  "version": "0.0.1",
+  "private": true,
+  "description": "VitePress docs + minimal Vitest placeholders for CI (Zig binary is built via zig build; see README).",
+  "type": "module",
+  "scripts": {
+    "build": "vitepress build docs",
+    "docs:build": "vitepress build docs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests/unit --reporter=verbose",
+    "test:adapter": "vitest run tests/adapter --reporter=verbose --passWithNoTests",
+    "test:smoke": "vitest run tests/smoke --reporter=verbose",
+    "test:e2e": "vitest run tests/e2e --reporter=verbose"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.3",
+    "vitepress": "^1.6.3",
+    "vitest": "^3.0.5"
+  }
+}
